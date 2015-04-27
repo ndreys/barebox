@@ -84,6 +84,21 @@ static inline void imx6_uart_setup_ll(void)
 #endif
 }
 
+#define __IMX_CCM_BASE(soc) soc##_CCM_BASE_ADDR
+#define IMX_CCM_BASE(soc) __IMX_CCM_BASE(soc)
+
+static inline void imx_ungate_all_peripherals(void __iomem *ccmbase)
+{
+	int i;
+	for (i = 0x68; i <= 0x80; i += 4)
+		writel(0xffffffff, ccmbase + i);
+}
+
+static inline void imx6_ungate_all_peripherals(void)
+{
+	imx_ungate_all_peripherals(IOMEM(MX6_CCM_BASE_ADDR));
+}
+
 static inline void PUTC_LL(int c)
 {
 	void __iomem *base = IOMEM(IMX_UART_BASE(IMX_DEBUG_SOC,
@@ -105,8 +120,15 @@ static inline void imx_uart_setup_ll(void __iomem *uartbase,
 				     unsigned int refclock)
 {
 }
+
 static inline void imx51_uart_setup_ll(void) {}
 static inline void imx6_uart_setup_ll(void)  {}
+
+static inline void imx_ungate_all_peripherals(void __iomem *ccmbase)
+{
+}
+
+static inline void imx6_ungate_all_peripherals(void) {}
 
 #endif /* CONFIG_DEBUG_LL */
 #endif /* __MACH_DEBUG_LL_H__ */
