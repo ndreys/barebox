@@ -28,8 +28,13 @@
 	#size-cells = <1>;
 
 	partition@0 {
+		label = "barebox";
+		reg = <0x0 0x40000>;
+	};
+
+	partition@1 {
 		label = "barebox-environment";
-		reg = <0x80000 0x20000>;
+		reg = <0x80000 0x80000>;
 	};
 };
 
@@ -67,5 +72,21 @@
 				MX51_PAD_EIM_A20__GPIO2_14		0x00000085 /* Phy Reset */
 			>;
 		};
+	};
+};
+
+
+&flash {
+       /delete-node/ partition@40000;
+
+       partition@0 {
+		label = "barebox-pbl";
+		reg = <0x0 0x40000>;
+		/delete-property/ read-only;
+	};
+
+	partition@1 {
+		label = "barebox";
+		reg = <0x40000 0x3c0000>;
 	};
 };
