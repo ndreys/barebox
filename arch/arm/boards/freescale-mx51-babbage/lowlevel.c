@@ -1,5 +1,6 @@
 #include <debug_ll.h>
 #include <mach/clock-imx51_53.h>
+#include <mach/iomux-mx51.h>
 #include <common.h>
 #include <mach/esdctl.h>
 #include <mach/generic.h>
@@ -27,11 +28,14 @@ static inline void setup_uart(void)
 	 * The code below should be more or less a "moral equivalent"
 	 * of:
 	 *	 MX51_PAD_UART1_TXD__UART1_TXD 0x1c5
-	 *
+	 *       MX51_PAD_UART1_TXD__UART1_RXD 0x1c5
 	 * in device tree
 	 */
 	writel(0x00000000, iomuxbase + 0x022c);
-	writel(0x000001c5, iomuxbase + 0x061c);
+	writel(MX51_UART_PAD_CTRL, iomuxbase + 0x061c);
+	writel(0, iomuxbase + 0x0228);
+	writel(0, iomuxbase + 0x09e4);
+	writel(MX51_UART_PAD_CTRL, iomuxbase + 0x0618);
 
 	imx51_uart_setup_ll();
 
