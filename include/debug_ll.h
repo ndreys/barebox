@@ -38,6 +38,27 @@ static inline void putc_ll(char value)
 	PUTC_LL(value);
 }
 
+#if defined (CONFIG_DEBUG_LL_INPUT)
+static inline int tstc_ll(void)
+{
+	return TSTC_LL();
+}
+
+static inline int getc_ll(void)
+{
+	return GETC_LL();
+}
+#else
+static inline int tstc_ll(void)
+{
+	return 0;
+}
+static inline int getc_ll(void)
+{
+	return -ENOTSUPP;
+}
+#endif
+
 static inline void puthex_ll(unsigned long value)
 {
 	int i; unsigned char ch;
@@ -69,6 +90,15 @@ static inline void puts_ll(const char * str)
 
 static inline void putc_ll(char value)
 {
+}
+
+static inline int tstc_ll(void)
+{
+	return 0;
+}
+static inline int getc_ll(void)
+{
+	return -ENOTSUPP;
 }
 
 static inline void puthex_ll(unsigned long value)

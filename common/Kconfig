@@ -774,6 +774,15 @@ config DEBUG_LL
 	  This requires SoC specific support. Most SoCs require the debug UART to be
 	  initialized by a debugger or first stage bootloader.
 
+config DEBUG_LL_INPUT
+        bool
+	depends on DEBUG_LL
+	depends on HAS_DEBUG_LL_INPUT
+	prompt "enable data reception on low level debug port"
+	help
+	  Enable this option if you want to be able to receive data using low
+	  level debug port as well as sending data over it.
+
 choice
 	prompt "Kernel low-level debugging port"
 	depends on DEBUG_LL
@@ -930,3 +939,5 @@ endmenu
 
 config HAS_DEBUG_LL
 	bool
+config HAS_DEBUG_LL_INPUT
+        bool

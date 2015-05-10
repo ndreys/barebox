@@ -114,6 +114,32 @@ static inline void PUTC_LL(int c)
 
 	writel(c, base + URTX0);
 }
+
+#ifdef CONFIG_DEBUG_LL_INPUT
+static inline bool TSTC_LL(void)
+{
+	void __iomem *base = IOMEM(IMX_UART_BASE(IMX_DEBUG_SOC,
+						 CONFIG_DEBUG_IMX_UART_PORT));
+
+	return readl(base + USR2) & USR2_RDR;
+}
+
+static inline int GETC_LL(void)
+{
+	void __iomem *base = IOMEM(IMX_UART_BASE(IMX_DEBUG_SOC,
+						 CONFIG_DEBUG_IMX_UART_PORT));
+
+	if (!base)
+		return -EINVAL;
+
+	if (!(readl(base + UCR1) & UCR1_UARTEN))
+		return -EINVAL;
+
+	while (!TSTC_LL());
+
+	return 0xff & readl(base + URXD0);
+}
+#endif
 #else
 
 static inline void imx_uart_setup_ll(void __iomem *uartbase,

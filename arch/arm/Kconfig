@@ -103,6 +103,7 @@ config ARCH_IMX
 	select CLKDEV_LOOKUP
 	select WATCHDOG_IMX_RESET_SOURCE
 	select HAS_DEBUG_LL
+	select HAS_DEBUG_LL_INPUT
 
 config ARCH_MVEBU
 	bool "Marvell EBU platforms"
