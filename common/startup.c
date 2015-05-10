@@ -118,11 +118,24 @@ void __noreturn start_barebox(void)
 	/* NOTREACHED - no way out of command loop except booting */
 }
 
-void __noreturn hang (void)
+void __noreturn __hang (void)
 {
 	puts ("### ERROR ### Please RESET the board ###\n");
 	for (;;);
 }
+
+static hang_handler_t hang_handler = __hang;
+
+void __noreturn hang(void)
+{
+	hang_handler();
+}
+
+void set_hang_handler(hang_handler_t handler)
+{
+	hang_handler = handler;
+}
+
 
 void (*board_shutdown)(void);
 

@@ -56,7 +56,11 @@
  */
 void reginfo(void);
 
+typedef void __noreturn (*hang_handler_t)(void);
+
 void __noreturn hang (void);
+void __noreturn __hang (void);
+void set_hang_handler(hang_handler_t handler);
 
 char *size_human_readable(unsigned long long size);
 
@@ -191,6 +195,24 @@ void barebox_set_hostname(const char *);
 #define IOMEM(addr)	((void __force __iomem *)CKSEG1ADDR(addr))
 #else
 #define IOMEM(addr)	((void __force __iomem *)(addr))
+#endif
+
+#if defined(CONFIG_ARM)
+#include <asm/barebox-arm.h>
+
+static inline void *get_true_address(const void *ptr)
+{
+	resource_size_t address = (resource_size_t)ptr;
+
+	address -= get_runtime_offset();
+
+	return (void *)address;
+}
+#else
+static inline void *get_true_address(const void *ptr)
+{
+	return (void *)ptr;
+}
 #endif
 
 /*
