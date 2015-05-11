@@ -35,6 +35,12 @@ obj-y			+= random.o
 obj-y			+= lzo/
 obj-$(CONFIG_LZ4_DECOMPRESS) += lz4/
 obj-y			+= show_progress.o
+pbl-$(CONFIG_MEMORY_VALIDATION) += show_progress.o
+# The code is going to be used before MMU is set up and unaligned
+# access will cause an exception(there is an unaligned access to the
+# contenst of 'spinchr' in show_progress())
+CFLAGS_pbl-show_progress.o = -mno-unaligned-access
+
 obj-$(CONFIG_LZO_DECOMPRESS)		+= decompress_unlzo.o
 obj-$(CONFIG_LZ4_DECOMPRESS) += decompress_unlz4.o
 obj-$(CONFIG_PROCESS_ESCAPE_SEQUENCE)	+= process_escape_sequence.o

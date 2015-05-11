@@ -20,6 +20,7 @@
 #define pr_fmt(fmt) "uncompress.c: " fmt
 
 #include <common.h>
+#include <memtest.h>
 #include <init.h>
 #include <linux/sizes.h>
 #include <pbl.h>
@@ -47,6 +48,7 @@ static void __noreturn noinline uncompress_start_payload(unsigned long membase,
 	uint32_t pg_len;
 	void __noreturn (*barebox)(unsigned long, unsigned long, void *);
 	uint32_t endmem = membase + memsize;
+	unsigned long malloc_start, malloc_end;
 	unsigned long barebox_base;
 	uint32_t *image_end;
 	void *pg_start;
@@ -64,10 +66,14 @@ static void __noreturn noinline uncompress_start_payload(unsigned long membase,
 		 * to the current address. Otherwise it may be a readonly location.
 		 * Copy and relocate to the start of the memory in this case.
 		 */
-		if (pc > membase && pc < membase + memsize)
+		if (pc > membase && pc < membase + memsize) {
 			relocate_to_current_adr();
-		else
+		} else {
+			validate_memory_range("validating pbl relocation area",
+					      membase,
+					      membase + arm_barebox_image_size() - 1);
 			relocate_to_adr(membase);
+		}
 	}
 
 	if (IS_ENABLED(CONFIG_RELOCATABLE))
@@ -76,6 +82,21 @@ static void __noreturn noinline uncompress_start_payload(unsigned long membase,
 		barebox_base = TEXT_BASE;
 
 	setup_c();
+
+	validate_memory_range("validating barebox decompression area",
+			      barebox_base, endmem - 1);
+
+	/*
+	  We know that when we give control to __start function of
+	  uncompressed image _text would be within the boundaries of
+	  (membase, membase + memsize) so the malloc_end variable
+	  would be set to _text
+	 */
+	malloc_end   = barebox_base;
+	malloc_start = arm_get_malloc_start(membase, malloc_end);
+
+	validate_memory_range("validating malloc area",
+			      malloc_start, malloc_end - 1);
 
 	pr_debug("memory at 0x%08lx, size 0x%08lx\n", membase, memsize);
 
@@ -122,7 +143,12 @@ static void __noreturn noinline uncompress_start_payload(unsigned long membase,
 void __naked __noreturn barebox_arm_entry(unsigned long membase,
 		unsigned long memsize, void *boarddata)
 {
-	arm_setup_stack(membase + memsize - 16);
+	unsigned long stack_end = membase + memsize - 16;
+
+	validate_memory_range("validating stack area",
+			      membase + memsize - STACK_SIZE, stack_end);
+
+	arm_setup_stack(stack_end);
 
 	uncompress_start_payload(membase, memsize, boarddata);
 }

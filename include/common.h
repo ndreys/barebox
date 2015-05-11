@@ -209,6 +209,7 @@ static inline void *get_true_address(const void *ptr)
 	return (void *)address;
 }
 #else
+
 static inline void *get_true_address(const void *ptr)
 {
 	return (void *)ptr;

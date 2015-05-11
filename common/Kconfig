@@ -246,6 +246,14 @@ config MALLOC_SIZE
 	prompt "malloc area size"
 endmenu
 
+config MEMORY_VALIDATION
+       bool "Validate regions of memory prior to using them"
+       select PBL_CONSOLE
+       help
+         select this option if you want Barebox to perform memory test
+         on regions of DRAM memory that it is about to use for the
+         first time
+
 config BROKEN
 	bool
 

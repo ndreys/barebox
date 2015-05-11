@@ -83,6 +83,34 @@ static inline unsigned long arm_barebox_image_place(unsigned long endmem)
 	return endmem;
 }
 
+static inline unsigned long arm_barebox_image_size(void)
+{
+	/* We assume that 1G is significantly more that Barebox will
+	 * ever try to reserve */
+	return SZ_1G - arm_barebox_image_place(SZ_1G);
+}
+
+static inline unsigned long arm_get_malloc_start(unsigned long membase,
+						 unsigned long malloc_end)
+{
+	unsigned long malloc_start;
+	/*
+	 * Maximum malloc space is the Kconfig value if given
+	 * or 1GB.
+	 */
+	if (MALLOC_SIZE > 0) {
+		malloc_start = malloc_end - MALLOC_SIZE;
+		if (malloc_start < membase)
+			malloc_start = membase;
+	} else {
+		malloc_start = malloc_end - (malloc_end - membase) / 2;
+		if (malloc_end - malloc_start > SZ_1G)
+			malloc_start = malloc_end - SZ_1G;
+	}
+
+	return malloc_start;
+}
+
 #define ENTRY_FUNCTION(name, arg0, arg1, arg2)				\
 	static void __##name(uint32_t, uint32_t, uint32_t);		\
 									\
