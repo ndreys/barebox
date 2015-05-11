@@ -30,12 +30,19 @@ int pr_print(int level, const char *fmt, ...)
 
 	return i;
 }
-
+#ifdef CONFIG_DEBUG_LL_INPUT
+int ctrlc(void)
+{
+	if (tstc_ll() && getc_ll() == 3)
+		return 1;
+	return 0;
+}
+#else
 int ctrlc(void)
 {
 	return 0;
 }
-
+#endif
 void console_putc(unsigned int ch, char c)
 {
 	putc_ll(c);
