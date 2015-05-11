@@ -47,6 +47,54 @@ static inline void setup_uart(void)
 }
 #endif	/* CONFIG_DEBUG_LL */
 
+#define IMX21_WDOG_WCR	0x00 /* Watchdog Control Register */
+#define IMX21_WDOG_WSR	0x02 /* Watchdog Service Register */
+#define IMX21_WDOG_WSTR	0x04 /* Watchdog Status Register  */
+#define IMX21_WDOG_WMCR	0x08 /* Misc Register */
+#define IMX21_WDOG_WCR_WDE	(1 << 2)
+#define IMX21_WDOG_WCR_SRS	(1 << 4)
+#define IMX21_WDOG_WCR_WDA	(1 << 5)
+
+void __noreturn reset_cpu(unsigned long addr)
+{
+	void __iomem *wdogbase = IOMEM(MX51_WDOG_BASE_ADDR);
+
+	writew(0, wdogbase + IMX21_WDOG_WCR);
+	writew(IMX21_WDOG_WCR_WDE, wdogbase + IMX21_WDOG_WCR);
+
+	/* Write Service Sequence */
+	writew(0x5555, wdogbase + IMX21_WDOG_WSR);
+	writew(0xaaaa, wdogbase + IMX21_WDOG_WSR);
+
+	__hang();
+}
+
+static void __noreturn imx51_babbage_hang(void)
+{
+	for (;;) {
+		int c;
+
+		if (tstc_ll()) {
+			c = getc_ll();
+			if (c < 0)
+				break;
+
+			switch (c) {
+			case 'r':
+				reset_cpu(0);
+				break;
+			case 'p':
+				putc_ll(c);
+				break;
+			}
+		}
+
+		putc_ll('h');
+	}
+
+	__hang();
+}
+
 extern char __dtb_imx51_babbage_start[];
 
 ENTRY_FUNCTION(start_imx51_babbage, r0, r1, r2)
@@ -85,6 +133,7 @@ ENTRY_FUNCTION(start_imx51_babbage_xload, r0, r1, r2)
 		setup_uart();
 
 	arm_setup_stack(0x20000000 - 16);
+	set_hang_handler(imx51_babbage_hang);
 
 	babbage_entry();
 }
