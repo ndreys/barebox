@@ -1,4 +1,5 @@
 #include <debug_ll.h>
+#include <memtest.h>
 #include <mach/clock-imx51_53.h>
 #include <mach/iomux-mx51.h>
 #include <common.h>
@@ -95,6 +96,12 @@ static void __noreturn imx51_babbage_hang(void)
 	__hang();
 }
 
+static int __mem_test(resource_size_t start,
+		     resource_size_t end)
+{
+	return mem_test(start, end, false);
+}
+
 extern char __dtb_imx51_babbage_start[];
 
 ENTRY_FUNCTION(start_imx51_babbage, r0, r1, r2)
@@ -120,6 +127,7 @@ static noinline void babbage_entry(void)
 	relocate_to_current_adr();
 	setup_c();
 
+	set_memory_validation_handler(__mem_test);
 	puts_ll("lowlevel init done\n");
 
 	imx51_barebox_entry(NULL);
