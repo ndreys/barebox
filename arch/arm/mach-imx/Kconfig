@@ -376,12 +376,16 @@ config MACH_ZII_VF610_DEV
 	select ARCH_VF610
 	select CLKDEV_LOOKUP
 
+config MACH_ZODIAC
+	bool
+
 config MACH_ZODIAC_NIU
 	bool "Zodiac i.MX51 Network Interface Unit"
 	select ARCH_IMX51
 	select SPI
 	select DRIVER_SPI_IMX
 	select MFD_MC13XXX
+	select MACH_ZODIAC
 
 endif
 
