@@ -152,3 +152,4 @@ obj-$(CONFIG_MACH_VF610_TWR)			+= freescale-vf610-twr/
 obj-$(CONFIG_MACH_ZII_RDU2)			+= zii-imx6q-rdu2/
 obj-$(CONFIG_MACH_ZII_VF610_DEV)		+= zii-vf610-dev/
 obj-$(CONFIG_MACH_ZODIAC_NIU)			+= zodiac/
+obj-$(CONFIG_MACH_ZODIAC)			+= zodiac/

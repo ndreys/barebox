@@ -431,12 +431,16 @@ config MACH_NXP_IMX6ULL_EVK
 	bool "NXP i.MX6ull EVK Board"
 	select ARCH_IMX6UL
 
+config MACH_ZODIAC
+	bool
+
 config MACH_ZODIAC_NIU
 	bool "Zodiac i.MX51 Network Interface Unit"
 	select ARCH_IMX51
 	select SPI
 	select DRIVER_SPI_IMX
 	select MFD_MC13XXX
+	select MACH_ZODIAC
 
 endif
 
