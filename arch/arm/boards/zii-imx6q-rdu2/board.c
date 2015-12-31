@@ -63,25 +63,13 @@ static int ar8031_phy_fixup(struct phy_device *dev)
 	return 0;
 }
 
-static int sabresd_devices_init(void)
+static int rdu2_coredevices_init(void)
 {
-	if (!of_machine_is_compatible("fsl,imx6q-sabresd"))
-		return 0;
-
-	armlinux_set_architecture(3980);
-	barebox_set_hostname("sabresd");
-
-	return 0;
-}
-device_initcall(sabresd_devices_init);
-
-static int sabresd_coredevices_init(void)
-{
-	if (!of_machine_is_compatible("fsl,imx6q-sabresd"))
+	if (!of_machine_is_compatible("zii,imx6q-zii-rdu2"))
 		return 0;
 
 	phy_register_fixup_for_uid(PHY_ID_AR8031, AR_PHY_ID_MASK,
-			ar8031_phy_fixup);
+				   ar8031_phy_fixup);
 
 	return 0;
 }
@@ -89,4 +77,4 @@ static int sabresd_coredevices_init(void)
  * Do this before the fec initializes but after our
  * gpios are available.
  */
-coredevice_initcall(sabresd_coredevices_init);
+coredevice_initcall(rdu2_coredevices_init);
