@@ -36,6 +36,7 @@
 #include <spi/spi.h>
 #include <mach/spi.h>
 #include <mach/usb.h>
+#include <zii/pic.h>
 
 #define PHY_ID_AR8031	0x004dd074
 #define AR_PHY_ID_MASK	0xffffffff
@@ -152,3 +153,23 @@ static int rdu2_reset_dacs(void)
  * be already initialized
  */
 late_initcall(rdu2_reset_dacs);
+
+#ifdef CONFIG_CMD_ZODIAC_PIC
+
+static int imx6_zodiac_lateinit(void)
+{
+	struct console_device *cdev;
+
+	for_each_console(cdev) {
+		if (!(strcmp(cdev->devname, "serial3"))) {
+			printf("Init PIC on %s\n", cdev->devname);
+
+			pic_init(cdev, RDU2_PIC_BAUD_RATE, PIC_HW_ID_RDU2);
+		}
+	}
+
+	return 0;
+}
+postenvironment_initcall(imx6_zodiac_lateinit);
+
+#endif
