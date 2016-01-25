@@ -78,3 +78,28 @@ static int rdu2_coredevices_init(void)
  * gpios are available.
  */
 coredevice_initcall(rdu2_coredevices_init);
+
+
+#define RDU2_DAC1__RESET	IMX_GPIO_NR(1, 0)
+#define RDU2_DAC2__RESET	IMX_GPIO_NR(1, 2)
+
+static int rdu2_reset_dacs(void)
+{
+	if (!of_machine_is_compatible("zii,imx6q-zii-rdu2"))
+		return 0;
+
+
+	gpio_direction_output(RDU2_DAC1__RESET, 0);
+	gpio_direction_output(RDU2_DAC2__RESET, 0);
+	mdelay(2);
+	gpio_direction_output(RDU2_DAC1__RESET, 1);
+	gpio_direction_output(RDU2_DAC2__RESET, 1);
+	mdelay(2);
+
+	return 0;
+}
+/*
+ * When this function is called a hog pingroup in device tree needs to
+ * be already initialized
+ */
+late_initcall(rdu2_reset_dacs);
