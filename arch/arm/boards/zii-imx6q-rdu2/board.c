@@ -80,21 +80,70 @@ static int rdu2_coredevices_init(void)
 coredevice_initcall(rdu2_coredevices_init);
 
 
-#define RDU2_DAC1__RESET	IMX_GPIO_NR(1, 0)
-#define RDU2_DAC2__RESET	IMX_GPIO_NR(1, 2)
+#define RDU2_DAC1_RESET	IMX_GPIO_NR(1, 0)
+#define RDU2_DAC2_RESET	IMX_GPIO_NR(1, 2)
+#define RDU2_RST_TOUCH	IMX_GPIO_NR(1, 7)
+#define RDU2_NFC_RESET	IMX_GPIO_NR(1, 17)
+#define RDU2_HPA1_SDn	IMX_GPIO_NR(1, 4)
+#define RDU2_HPA2_SDn	IMX_GPIO_NR(1, 5)
+
+static const struct gpio rdu2_reset_gpios[] = {
+	{
+		.gpio = RDU2_DAC1_RESET,
+		.flags = GPIOF_OUT_INIT_LOW,
+		.label = "dac1-reset",
+	},
+	{
+		.gpio = RDU2_DAC2_RESET,
+		.flags = GPIOF_OUT_INIT_LOW,
+		.label = "dac2-reset",
+	},
+	{
+		.gpio = RDU2_RST_TOUCH,
+		.flags = GPIOF_OUT_INIT_HIGH,
+		.label = "rst-touch#",
+	},
+	{
+		.gpio = RDU2_NFC_RESET,
+		.flags = GPIOF_OUT_INIT_HIGH,
+		.label = "nfc-reset",
+	},
+	{
+		.gpio = RDU2_HPA1_SDn,
+		.flags = GPIOF_OUT_INIT_LOW,
+		.label = "hpa1-sd-n",
+	},
+	{
+		.gpio = RDU2_HPA2_SDn,
+		.flags = GPIOF_OUT_INIT_LOW,
+		.label = "hpa2n-sd-n",
+	},
+};
 
 static int rdu2_reset_dacs(void)
 {
+	int ret;
+
 	if (!of_machine_is_compatible("zii,imx6q-zii-rdu2"))
 		return 0;
 
+	ret = gpio_request_array(rdu2_reset_gpios,
+				 ARRAY_SIZE(rdu2_reset_gpios));
+	if (ret) {
+		pr_err("Failed to request RDU2 reset gpios: %s\n", strerror(-ret));
+		return ret;
+	}
 
-	gpio_direction_output(RDU2_DAC1__RESET, 0);
-	gpio_direction_output(RDU2_DAC2__RESET, 0);
-	mdelay(2);
-	gpio_direction_output(RDU2_DAC1__RESET, 1);
-	gpio_direction_output(RDU2_DAC2__RESET, 1);
-	mdelay(2);
+	mdelay(100);
+
+	gpio_direction_output(RDU2_DAC1_RESET, 1);
+	gpio_direction_output(RDU2_DAC2_RESET, 1);
+	gpio_direction_output(RDU2_RST_TOUCH,  0);
+	gpio_direction_output(RDU2_NFC_RESET,  0);
+	gpio_direction_output(RDU2_HPA1_SDn,   1);
+	gpio_direction_output(RDU2_HPA2_SDn,   1);
+
+	mdelay(100);
 
 	return 0;
 }
