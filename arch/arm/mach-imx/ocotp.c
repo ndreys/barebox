@@ -28,6 +28,7 @@
 #include <clock.h>
 #include <regmap.h>
 #include <linux/clk.h>
+#include <linux/nvmem-provider.h>
 
 /*
  * a single MAC address reference has the form
@@ -85,6 +86,7 @@ struct ocotp_priv {
 	int sense_enable;
 	char ethaddr[6];
 	struct regmap_config map_config;
+	struct nvmem_config nvmem_config;
 };
 
 static int imx6_ocotp_set_timing(struct ocotp_priv *priv)
@@ -411,6 +413,12 @@ static int imx_ocotp_probe(struct device_d *dev)
 	ret = regmap_register_cdev(priv->map, "imx-ocotp");
 	if (ret)
 		return ret;
+
+	priv->nvmem_config.name = "imx-ocotp";
+	priv->nvmem_config.read_only = true;
+	priv->nvmem_config.dev = dev;
+
+	nvmem_register(&priv->nvmem_config, priv->map);
 
 	if (IS_ENABLED(CONFIG_IMX_OCOTP_WRITE)) {
 		dev_add_param_bool(&(priv->dev), "permanent_write_enable",
