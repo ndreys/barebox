@@ -33,5 +33,5 @@ source "drivers/rtc/Kconfig"
 source "drivers/firmware/Kconfig"
 source "drivers/phy/Kconfig"
 source "drivers/crypto/Kconfig"
-
+source "drivers/nvmem/Kconfig"
 endmenu

@@ -33,4 +33,6 @@ obj-$(CONFIG_GENERIC_PHY) += phy/
 obj-$(CONFIG_HAB) += hab/
 obj-$(CONFIG_CRYPTO_HW) += crypto/
 obj-$(CONFIG_AIODEV) += aiodev/
+obj-$(CONFIG_NVMEM) += nvmem/
+
 
