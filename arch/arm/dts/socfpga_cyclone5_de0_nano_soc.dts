@@ -19,16 +19,16 @@
 #include "socfpga.dtsi"
 
 / {
-	model = "Terasic DE0-Nano-SoC/Atlas-SoC Kit";
-	compatible = "terasic,de0-nano-soc","altr,socfpga-cyclone5", "altr,socfpga";
+       model = "Terasic DE0-Nano-SoC/Atlas-SoC Kit";
+       compatible = "terasic,de0-nano-soc","altr,socfpga-cyclone5", "altr,socfpga";
 
-	chosen {
-		stdout-path = &uart0;
-	};
+       chosen {
+               stdout-path = &uart0;
+       };
 
-	leds: gpio-leds {
-	};
+       leds: gpio-leds {
+       };
 
-	buttons: gpio-keys {
-	};
+       buttons: gpio-keys {
+       };
 };

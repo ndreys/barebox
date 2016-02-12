@@ -22,55 +22,55 @@ extern char __dtb_socfpga_cyclone5_de0_nano_soc_start[];
 
 ENTRY_FUNCTION(start_socfpga_de0_nano_soc, r0, r1, r2)
 {
-	void *fdt;
+       void *fdt;
 
-	arm_cpu_lowlevel_init();
+       arm_cpu_lowlevel_init();
 
-	fdt = __dtb_socfpga_cyclone5_de0_nano_soc_start - get_runtime_offset();
+       fdt = __dtb_socfpga_cyclone5_de0_nano_soc_start - get_runtime_offset();
 
-	barebox_arm_entry(0x0, SZ_1G, fdt);
+       barebox_arm_entry(0x0, SZ_1G, fdt);
 }
 
 static noinline void de0_nano_soc_entry(void)
 {
-	struct socfpga_io_config io_config;
-	int ret;
+       struct socfpga_io_config io_config;
+       int ret;
 
-	arm_early_mmu_cache_invalidate();
+       arm_early_mmu_cache_invalidate();
 
-	relocate_to_current_adr();
-	setup_c();
+       relocate_to_current_adr();
+       setup_c();
 
-	io_config.pinmux = sys_mgr_init_table;
-	io_config.num_pin = ARRAY_SIZE(sys_mgr_init_table);
-	io_config.iocsr_emac_mixed2 = iocsr_scan_chain0_table;
-	io_config.iocsr_mixed1_flash = iocsr_scan_chain1_table;
-	io_config.iocsr_general = iocsr_scan_chain2_table;
-	io_config.iocsr_ddr = iocsr_scan_chain3_table;
+       io_config.pinmux = sys_mgr_init_table;
+       io_config.num_pin = ARRAY_SIZE(sys_mgr_init_table);
+       io_config.iocsr_emac_mixed2 = iocsr_scan_chain0_table;
+       io_config.iocsr_mixed1_flash = iocsr_scan_chain1_table;
+       io_config.iocsr_general = iocsr_scan_chain2_table;
+       io_config.iocsr_ddr = iocsr_scan_chain3_table;
 
-	socfpga_lowlevel_init(&cm_default_cfg, &io_config);
+       socfpga_lowlevel_init(&cm_default_cfg, &io_config);
 
-	puts_ll("lowlevel init done\n");
-	puts_ll("SDRAM setup...\n");
+       puts_ll("lowlevel init done\n");
+       puts_ll("SDRAM setup...\n");
 
-	socfpga_sdram_mmr_init();
+       socfpga_sdram_mmr_init();
 
-	puts_ll("SDRAM calibration...\n");
+       puts_ll("SDRAM calibration...\n");
 
-	ret = socfpga_mem_calibration();
-	if (!ret)
-		hang();
+       ret = socfpga_mem_calibration();
+       if (!ret)
+               hang();
 
-	puts_ll("done\n");
+       puts_ll("done\n");
 
-	barebox_arm_entry(0x0, SZ_1G, NULL);
+       barebox_arm_entry(0x0, SZ_1G, NULL);
 }
 
 ENTRY_FUNCTION(start_socfpga_de0_nano_soc_xload, r0, r1, r2)
 {
-	arm_cpu_lowlevel_init();
+       arm_cpu_lowlevel_init();
 
-	arm_setup_stack(0xffff0000 + SZ_64K - SZ_4K - 16);
+       arm_setup_stack(0xffff0000 + SZ_64K - SZ_4K - 16);
 
-	de0_nano_soc_entry();
+       de0_nano_soc_entry();
 }
