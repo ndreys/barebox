@@ -737,8 +737,6 @@ static void cb_flash(struct usb_ep *ep, struct usb_request *req, const char *cmd
 
 		ret = barebox_update(&data);
 
-		free(data.image);
-
 		if (ret) {
 			fastboot_tx_print(f_fb, "FAILupdate barebox: %s", strerror(-ret));
 			return;
