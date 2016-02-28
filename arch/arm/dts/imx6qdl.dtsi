@@ -8,3 +8,17 @@
 		ipu0 = &ipu1;
 	};
 };
+
+&ocotp {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	analog1: ocotp_ana1@34 {
+		reg = <0x38 0x4>;
+	};
+};
+
+&tempmon {
+	nvmem-cells = <&analog1>;
+	nvmem-cell-names = "ocotp-ana1";
+};
