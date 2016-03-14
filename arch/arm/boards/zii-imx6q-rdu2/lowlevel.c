@@ -38,3 +38,17 @@ ENTRY_FUNCTION(start_imx6q_zii_rdu2, r0, r1, r2)
 
 	barebox_arm_entry(0x10000000, SZ_2G, fdt);
 }
+
+ENTRY_FUNCTION(start_imx6qp_zii_rdu2, r0, r1, r2)
+{
+	void *fdt;
+
+	imx6_cpu_lowlevel_init();
+
+	if (IS_ENABLED(CONFIG_DEBUG_LL))
+		setup_uart();
+
+	fdt = __dtb_imx6q_zii_rdu2_start - get_runtime_offset();
+
+	barebox_arm_entry(0x10000000, SZ_2G, fdt);
+}
