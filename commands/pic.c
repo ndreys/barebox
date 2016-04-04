@@ -16,7 +16,9 @@
 #include <command.h>
 #include <errno.h>
 #include <net.h>
+#if 0
 #include <hwmon.h>
+#endif
 
 // IMS_PATCH: Runtime support of 2 different environment devices (MMC/SF) ------------
 #include <environment.h>
@@ -36,7 +38,7 @@
 int bootFailureIncremented = 0;
 
 struct zii_pic_mfd *pic = NULL;
-
+#if 0
 /* Each hwmon node has this additional data */
 struct pic_hwmon_data {
 	struct zii_pic_mfd 	*pic;
@@ -78,6 +80,7 @@ int pic_hwmon_reg(struct zii_pic_mfd *adev, int n)
 	}
 	return 0;
 }
+#endif
 
 static ssize_t zii_eeprom_read(struct zii_pic_mfd *adev, int eeprom_type,
 		char *buf, loff_t off, size_t count)
@@ -273,8 +276,10 @@ int pic_init(struct console_device *cdev, int speed, int hw_id)
 		pic->cmd = zii_pic_rdu2_cmds;
 		pic->checksum_size = 2;
 		pic->checksum_type = N_MCU_CHECKSUM_CRC16;
+#if 0		
 		/* register HWMON */
 		pic_hwmon_reg(pic, 2);
+#endif
 		/* register eeproms */
 		pic_eeprom_reg(pic, ZII_PIC_EEPROM_DDS);
 		pic_eeprom_reg(pic, ZII_PIC_EEPROM_RDU);
@@ -599,7 +604,7 @@ static int zii_pic_mcu_cmd_no_response(struct zii_pic_mfd *adev,
 }
 
 
-
+#if 0
 static int pic_hwmon_read(struct hwmon_sensor *sensor, s32 *reading)
 {
 	int ret;
@@ -617,7 +622,7 @@ static int pic_hwmon_read(struct hwmon_sensor *sensor, s32 *reading)
 
 	return 0;
 }
-
+#endif
 /********************************************************************
  * Function:        int GetEepromData(uint16_t pageNum, uint8_t *data)
  *
