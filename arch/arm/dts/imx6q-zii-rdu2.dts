@@ -35,6 +35,70 @@
 		gpios = <&gpio6 5 GPIO_ACTIVE_HIGH
 		         &gpio6 4 GPIO_ACTIVE_HIGH>;
 	};
+
+	regulators {
+		compatible = "simple-bus";
+
+		reg_28p0v: 28p0v {
+			/* main power in */
+			compatible = "regulator-fixed";
+			regulator-name = "28P0V";
+			regulator-min-microvolt = <28000000>;
+			regulator-max-microvolt = <28000000>;
+			regulator-always-on;
+		};
+
+		reg_12p0v: 12p0v {
+			/* main internal power */
+			compatible = "regulator-fixed";
+			vin-supply = <&reg_28p0v>;
+			regulator-name = "12P0V";
+			regulator-min-microvolt = <12000000>;
+			regulator-max-microvolt = <12000000>;
+			regulator-always-on;
+		};
+
+		reg_12p0v_periph: 12p0vperiph {
+			compatible = "regulator-fixed";
+			vin-supply = <&reg_28p0v>;
+			regulator-name = "12P0V-PERIPH";
+			regulator-min-microvolt = <12000000>;
+			regulator-max-microvolt = <12000000>;
+			/* controlled via "environment processor" */
+			regulator-always-on;
+		};
+
+		reg_5p0v_main: 5p0vmain {
+			compatible = "regulator-fixed";
+			vin-supply = <&reg_12p0v>;
+			regulator-name = "5P0MAIN";
+			regulator-min-microvolt = <5000000>;
+			regulator-max-microvolt = <5000000>;
+			/* controlled via "environment processor" */
+			regulator-always-on;
+		};
+
+		reg_usb_otg_vbus: regulator@0 {
+			compatible = "regulator-fixed";
+			pinctrl-names = "default";
+			pinctrl-0 = <&pinctrl_usb_otg_supply>;
+			vin-supply = <&reg_5p0v_main>;
+			regulator-name = "usb_otg_vbus";
+			regulator-min-microvolt = <5000000>;
+			regulator-max-microvolt = <5000000>;
+			gpio = <&gpio3 22 GPIO_ACTIVE_LOW>;
+			startup-delay-us = <1000>;
+		};
+
+		reg_usb_h1_vbus: regulator@1 {
+			compatible = "regulator-fixed";
+			vin-supply = <&reg_5p0v_main>;
+			regulator-name = "usb_h1_vbus";
+			regulator-min-microvolt = <5000000>;
+			regulator-max-microvolt = <5000000>;
+		};
+
+	};
 };
 
 &iomuxc {
@@ -133,6 +197,11 @@
 			>;
 		};
 
+		pinctrl_usb_otg_supply: usbotggrp {
+			fsl,pins = <
+				MX6QDL_PAD_EIM_D22__GPIO3_IO22		0x40000038
+			>;
+		};
 
 		pinctrl_ecspi1: ecspi1grp {
 			fsl,pins = <
@@ -414,6 +483,18 @@
 	bus-width = <8>;
 	non-removable;
 	no-1-8-v;
+	status = "okay";
+};
+
+&usbh1 {
+	vbus-supply = <&reg_usb_h1_vbus>;
+	status = "okay";
+};
+
+&usbotg {
+	vbus-supply = <&reg_usb_otg_vbus>;
+	disable-over-current;
+	dr_mode = "otg";
 	status = "okay";
 };
 
