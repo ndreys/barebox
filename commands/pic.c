@@ -547,7 +547,9 @@ int pic_recv_msg(unsigned char *out)
 int zii_pic_mcu_cmd(struct zii_pic_mfd *adev,
 		enum zii_pic_cmd_id id, const u8 * const data, u8 data_size)
 {
+	int ret;
 	int len;
+	int retry = 3;
 	unsigned char recv_data[ZII_PIC_CMD_MAX_SIZE];
 
 	pr_debug("%s: enter\n", __func__);
@@ -560,24 +562,36 @@ int zii_pic_mcu_cmd(struct zii_pic_mfd *adev,
 	if (unlikely(data_size != adev->cmd[id].data_len))
 		return -EINVAL;
 
-	pic_send_msg(data, adev->cmd[id].cmd_id, data_size);
+	do {
+		ret = 0;
+
+		pic_reset_comms();
+		pic_send_msg(data, adev->cmd[id].cmd_id, data_size);
 #ifdef DEBUG
-	print_hex_dump(KERN_DEBUG, "cmd data: ", DUMP_PREFIX_OFFSET,
-			16, 1, mcu_cmd.data, mcu_cmd.size, true);
+		print_hex_dump(KERN_DEBUG, "cmd data: ", DUMP_PREFIX_OFFSET,
+				16, 1, mcu_cmd.data, mcu_cmd.size, true);
 #endif
 
-	pic_reset_comms();
-	len = pic_recv_msg(recv_data);
-	if (len <= 0)
-		return 1;
+		pic_reset_comms();
+		len = pic_recv_msg(recv_data);
+		/* check if it is our response */
+		if ((len <= 0) || (pic_ack_id != recv_data[1])) {
+			if (len <= 0)
+				printf("len %d\n", len);
+			if (pic_ack_id != recv_data[1])
+				printf("packet id %d != %d (0x%2x)\n",
+					pic_ack_id, recv_data[1], recv_data[0]);
+			ret = -EAGAIN;
+			continue;
+		}
 #ifdef DEBUG
-	print_hex_dump(KERN_DEBUG, "response data: ", DUMP_PREFIX_OFFSET,
-			16, 1, mcu_cmd.data, mcu_cmd.size, true);
+		print_hex_dump(KERN_DEBUG, "response data: ", DUMP_PREFIX_OFFSET,
+				16, 1, mcu_cmd.data, mcu_cmd.size, true);
 #endif
+	} while ((--retry) && (ret));
 
-	/* check if it is our response */
-	if (pic_ack_id != recv_data[1])
-		return -EAGAIN;
+	if (ret)
+		return ret;
 
 	/* now cmd data contains response */
 	if (adev->cmd[id].response_handler)
