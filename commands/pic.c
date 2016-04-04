@@ -370,7 +370,15 @@ uint16_t CalculateCrc16_CCITT(const uint8_t * buf, uint32_t len)
 	return ((crc >> 8) | ((crc << 8) & 0xFF00)) ;
 }
 
-int pic_ack_id = 0;
+/* According spec 1 to 255 are valid values */
+int pic_ack_id = 1;
+void inc_packet_id(void)
+{
+	pic_ack_id++;
+	if (pic_ack_id == 256)
+		pic_ack_id = 1;
+}
+
 // Packs message into pic packet
 // Returns total message length
 static int pic_pack_msg(unsigned char *out, const unsigned char *in, char msg_type, int len)
@@ -384,7 +392,8 @@ static int pic_pack_msg(unsigned char *out, const unsigned char *in, char msg_ty
 	// Pack ack, data, and checksum into temp structure,
 	// because we have to escape the whole thing
 	temp[i++] = msg_type;
-	temp[i++] = ++pic_ack_id;
+	inc_packet_id();
+	temp[i++] = pic_ack_id;
 	if ((in) && (len)) {
 		memcpy(&temp[i], in, len);
 		i += len;
