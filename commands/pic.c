@@ -910,8 +910,17 @@ int do_pic_temp_1(int argc, char *argv[])
 {
 	int ret;
 
-	/* update status data */
-	ret = zii_pic_mcu_cmd(pic, ZII_PIC_CMD_GET_STATUS, NULL, 0);
+	if (pic->hw_id == PIC_HW_ID_RDU2) {
+		uint8_t data[1];
+
+		data[0] = 0;
+		ret = zii_pic_mcu_cmd(pic, ZII_PIC_CMD_GET_TEMPERATURE, data, 1);
+
+		pic->temperature = pic->temp * 500;
+	} else {
+		ret = zii_pic_mcu_cmd(pic, ZII_PIC_CMD_GET_STATUS, NULL, 0);
+	}
+
 	if (ret)
 		return ret;
 
@@ -924,9 +933,21 @@ int do_pic_temp_1(int argc, char *argv[])
 int do_pic_temp_2(int argc, char *argv[])
 {
 	int ret;
+	uint8_t data[1];
 
-	/* update status data */
-	ret = zii_pic_mcu_cmd(pic, ZII_PIC_CMD_GET_STATUS, NULL, 0);
+	data[0] = 1;
+
+	if (pic->hw_id == PIC_HW_ID_RDU2) {
+		uint8_t data[1];
+
+		data[0] = 1;
+		ret = zii_pic_mcu_cmd(pic, ZII_PIC_CMD_GET_TEMPERATURE, data, 1);
+
+		pic->temperature_2 = pic->temp * 500;
+	} else {
+		ret = zii_pic_mcu_cmd(pic, ZII_PIC_CMD_GET_STATUS, NULL, 0);
+	}
+
 	if (ret)
 		return ret;
 
@@ -1020,8 +1041,19 @@ int do_pic_get_rev(int argc, char *argv[])
 	if (ret)
 		return ret;
 
-	printf("RDU rev: %d\n", pic->rdu_rev);
-	printf("DDS rev: %d\n", pic->dds_rev);
+	if (pic->hw_id == PIC_HW_ID_RDU2) {
+		printf("Copper rev: %d.%c%c (%d)\n",
+			pic->copper_rev >> 5,
+			(pic->copper_rev & 0x1f) > 'Z' - 'A' ?
+				'A' : ' ',
+			(pic->copper_rev & 0x1f) > 'Z' - 'A' ?
+				'A' + (pic->copper_rev & 0x1f) - 'Z' - 'A' :
+				'A' + (pic->copper_rev & 0x1f),
+			pic->copper_rev & 0x1f);
+	} else {
+		printf("RDU rev: %d\n", pic->rdu_rev);
+		printf("DDS rev: %d\n", pic->dds_rev);
+	}
 
 	return 0;
 }

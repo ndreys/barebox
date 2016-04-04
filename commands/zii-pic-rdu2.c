@@ -73,7 +73,7 @@ struct pic_cmd_desc zii_pic_rdu2_cmds[ZII_PIC_CMD_COUNT] = {
 	[ZII_PIC_CMD_DDS_EEPROM_WRITE] =
 		{0xA3, 34, zii_pic_rdu2_process_dds_eeprom_write},
 	[ZII_PIC_CMD_COPPER_REV] =
-		{0x28, 0, zii_pic_rdu2_process_copper},
+		{0x2B, 0, zii_pic_rdu2_process_copper},
 	[ZII_PIC_CMD_LCD_DATA_STABLE] =
 		{0xBE, 0, NULL},
 };
@@ -181,11 +181,10 @@ int zii_pic_rdu2_process_copper(struct zii_pic_mfd *adev,
 {
 	pr_debug("%s: enter\n", __func__);
 
-	if (size != 2)
+	if (size != 1)
 		return -EINVAL;
 
-	adev->rdu_rev = data[0];
-	adev->dds_rev = data[1];
+	adev->copper_rev = data[0];
 
 	return 0;
 }

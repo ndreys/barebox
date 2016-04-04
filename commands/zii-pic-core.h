@@ -338,6 +338,7 @@ struct zii_pic_mfd {
 	int				ec;
 	int				rdu_rev;
 	int				dds_rev;
+	int				copper_rev;
 	int				temp;
 
 	struct pic_version		bootloader_version;
