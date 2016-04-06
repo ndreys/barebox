@@ -1522,6 +1522,13 @@ config CMD_FBTEST
 	help
 	  Simple FB draw commands
 
+config CMD_FBGUI
+	bool
+	depends on VIDEO
+	prompt "GUI draw commands"
+	help
+	  Simple GUI draw commands
+
 config CMD_READLINE
 	tristate
 	prompt "readline"
