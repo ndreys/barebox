@@ -6,6 +6,8 @@
 #include <errno.h>
 #include <fs.h>
 #include <malloc.h>
+#include <linux/font.h>
+#include <linux/unaligned/access_ok.h>
 
 /**
  * gu_get_pixel_rgb - convert a rgb triplet color to fb format
@@ -508,3 +510,78 @@ void gu_draw_circle(struct fb_info *info, void *buf,
 		}
 	}
 }
+
+#ifdef CONFIG_FONTS
+static void gu_put_char(struct fb_info *info, void *buf,
+			const struct font_desc *font,
+			int c, int x, int y,
+			u8 fr, u8 fg, u8 fb, u8 fa,
+			u8 br, u8 bg, u8 bb, u8 ba)
+{
+	int bpp = info->bits_per_pixel >> 3;
+	void *adr;
+	int i;
+	const char *inbuf;
+	int line_length;
+	int font_line_lenght;
+
+	i = find_font_index(font, c);
+	inbuf = font->data + i;
+	line_length = info->line_length;
+	font_line_lenght = (font->width + 7) / 8;
+	
+	for (i = 0; i < font->height; i++) {
+		int j;
+		uint32_t t;
+		/* max width 32 pix */
+		t = (inbuf[3] << 24) | (inbuf[2] << 16) | (inbuf[1] << 8) | inbuf[0];
+
+		//t = t >> (32 - font->width);
+		adr = buf + line_length * (y + i) + x * bpp;
+
+		for (j = 0; j < font->width; j++) {
+			if (t & 0x00000001)
+				gu_set_rgba_pixel(info, adr, fr, fg, fb, fa);
+			else
+				gu_set_rgba_pixel(info, adr, br, bg, bb, ba);
+
+			adr += bpp;
+			t >>= 1;
+		}
+		inbuf += font_line_lenght;
+	}
+}
+
+void gu_put_string(struct fb_info *info, void *buf,
+			const struct font_desc *font,
+			int x, int y, char* str,
+			u8 fr, u8 fg, u8 fb, u8 fa,
+			u8 br, u8 bg, u8 bb, u8 ba)
+{
+	int xp, yp;
+
+	xp = x;
+	yp = y;
+
+	while (*str != 0) {
+		if (*str == '\n' ) {
+			xp = info->xres;
+			str++;
+			continue;
+		}
+
+		if (xp + font->width > info->xres - 1) {
+			xp = x;
+			yp += font->height;
+		}
+
+		gu_put_char(info, buf, font,
+				*str, xp, yp,
+				fr, fg, fb, fa,
+				br, bg, bb, ba);
+
+		xp += font->width;
+		str++;
+	}
+}
+#endif

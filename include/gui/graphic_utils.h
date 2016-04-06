@@ -10,6 +10,7 @@
 #include <fb.h>
 #include <gui/image.h>
 #include <gui/gui.h>
+#include <linux/font.h>
 
 u32 gu_hex_to_pixel(struct fb_info *info, u32 color);
 u32 gu_rgb_to_pixel(struct fb_info *info, u8 r, u8 g, u8 b, u8 t);
@@ -41,5 +42,12 @@ void gu_draw_line_dotted(struct fb_info *info, void *buf,
 void gu_draw_circle(struct fb_info *info, void *buf,
 		int x0, int y0, int R,
 		u8 r, u8 g, u8 b, u8 a);
+#ifdef CONFIG_FONTS
+void gu_put_string(struct fb_info *info, void *buf,
+			const struct font_desc *font,
+			int x, int y, char* str,
+			u8 fr, u8 fg, u8 fb, u8 fa,
+			u8 br, u8 bg, u8 bb, u8 ba);
+#endif
 
 #endif /* __GRAPHIC_UTILS_H__ */
