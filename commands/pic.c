@@ -221,12 +221,12 @@ int pic_eeprom_reg(struct zii_pic_mfd *adev, int type)
 	if (eeprom->type == ZII_PIC_EEPROM_RDU) {
 		eeprom->cdev.size =
 			ZII_PIC_EEPROM_PAGE_SIZE * ZII_PIC_EEPROM_PAGE_COUNT;
-		eeprom->cdev.name = asprintf("pic_eeprom_rdu");
+		eeprom->cdev.name = basprintf("pic_eeprom_rdu");
 	}
 	else {
 		eeprom->cdev.size =
 			ZII_PIC_EEPROM_PAGE_SIZE * ZII_PIC_EEPROM_DDS_PAGE_COUNT;
-		eeprom->cdev.name = asprintf("pic_eeprom_dds");
+		eeprom->cdev.name = basprintf("pic_eeprom_dds");
 	}
 
 	devfs_create(&eeprom->cdev);
@@ -761,7 +761,7 @@ void do_pic_get_ip(void)
 		setenv ("ipaddr", ip_addr);
 		netmask = strdup(ip_to_string(netmask_extracted));
 		setenv ("netmask", netmask);
-		env_val = asprintf("%s:::%s::eth0:", ip_addr, netmask);
+		env_val = basprintf("%s:::%s::eth0:", ip_addr, netmask);
 		setenv ("ipsetup", env_val);
 		free(env_val);
 		free(netmask);
