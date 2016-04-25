@@ -274,7 +274,7 @@ int pic_init(struct console_device *cdev, int speed, int hw_id)
 		pic->checksum_type = N_MCU_CHECKSUM_CRC16;
 
 		/* register aiodev */
-		pic_aiodev_reg(pic, 2);
+		pic_aiodev_reg(pic, 4);
 
 		/* register eeproms */
 		pic_eeprom_reg(pic, ZII_PIC_EEPROM_DDS);
@@ -599,21 +599,31 @@ static int zii_pic_mcu_cmd_no_response(struct zii_pic_mfd *adev,
 	return 0;
 }
 
-
 static int pic_aiodev_read(struct aiochannel *chan, int *val)
 {
-	int ret;
-	uint8_t data[1];
+	int ret, n;
+
 	struct pic_aiodev_data *pic_hw = to_pic_data(chan);
 
-	data[0] = aiochannel_get_index(chan);
+	n = aiochannel_get_index(chan);
 
-	/* update status data */
-	ret = zii_pic_mcu_cmd(pic, ZII_PIC_CMD_GET_TEMPERATURE, data, 1);
-	if (ret)
-		return ret;
+	if (n < 2) {
+		uint8_t data[1];
+		data[0] = n;
 
-	*val = pic_hw->pic->temp * 500;
+		/* update status data */
+		ret = zii_pic_mcu_cmd(pic, ZII_PIC_CMD_GET_TEMPERATURE, data, 1);
+		if (ret)
+			return ret;
+
+		*val = pic_hw->pic->temp * 500;
+	} else {
+		ret = zii_pic_mcu_cmd(pic, ZII_PIC_CMD_GET_STATUS, NULL, 0);
+		if (ret)
+			return ret;
+
+		*val = (n == 2) ? pic->temperature : pic->temperature_2;
+	}
 
 	return 0;
 }
@@ -901,35 +911,6 @@ int do_pic_status(int argc, char *argv[])
 	return 0;
 }
 
-int do_pic_temp_1(int argc, char *argv[])
-{
-	int ret;
-
-	/* update status data */
-	ret = zii_pic_mcu_cmd(pic, ZII_PIC_CMD_GET_STATUS, NULL, 0);
-	if (ret)
-		return ret;
-
-	printf("T1 = %d.%03d\n",
-		pic->temperature / 1000, pic->temperature % 1000);
-
-	return 0;
-}
-
-int do_pic_temp_2(int argc, char *argv[])
-{
-	int ret;
-
-	/* update status data */
-	ret = zii_pic_mcu_cmd(pic, ZII_PIC_CMD_GET_STATUS, NULL, 0);
-	if (ret)
-		return ret;
-
-	printf("T2 = %d.%03d\n",
-		pic->temperature_2 / 1000, pic->temperature_2 % 1000);
-
-	return 0;
-}
 
 int do_pic_get_fw(int argc, char *argv[])
 {
@@ -1149,18 +1130,6 @@ BAREBOX_CMD_END
 BAREBOX_CMD_START(pic_status)
 	.cmd		= do_pic_status,
 	BAREBOX_CMD_DESC("Get PIC status")
-	BAREBOX_CMD_GROUP(CMD_GRP_MISC)
-BAREBOX_CMD_END
-
-BAREBOX_CMD_START(pic_temp_1)
-	.cmd		= do_pic_temp_1,
-	BAREBOX_CMD_DESC("Get PIC temperature 1")
-	BAREBOX_CMD_GROUP(CMD_GRP_MISC)
-BAREBOX_CMD_END
-
-BAREBOX_CMD_START(pic_temp_2)
-	.cmd		= do_pic_temp_2,
-	BAREBOX_CMD_DESC("Get PIC temperature 2")
 	BAREBOX_CMD_GROUP(CMD_GRP_MISC)
 BAREBOX_CMD_END
 
