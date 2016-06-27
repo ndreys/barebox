@@ -346,6 +346,11 @@ config MACH_VF610_TWR
 	bool "Freescale VF610 Tower Board"
 	select ARCH_VF610
 
+config MACH_ZII_VF610_DEV
+	bool "Zodiac VF610 Dev Family"
+	select ARCH_VF610
+	select CLKDEV_LOOKUP
+
 endif
 
 # ----------------------------------------------------------
