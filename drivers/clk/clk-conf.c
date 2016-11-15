@@ -14,6 +14,8 @@
 #include <linux/err.h>
 #include <linux/clk/clk-conf.h>
 
+#if defined(CONFIG_OFTREE) && defined(CONFIG_COMMON_CLK_OF_PROVIDER)
+
 static int __set_clk_parents(struct device_node *node, bool clk_supplier)
 {
 	struct of_phandle_args clkspec;
@@ -142,3 +144,5 @@ int of_clk_set_defaults(struct device_node *node, bool clk_supplier)
 	return __set_clk_rates(node, clk_supplier);
 }
 EXPORT_SYMBOL_GPL(of_clk_set_defaults);
+
+#endif
