@@ -78,6 +78,22 @@ typedef u64 iomux_v3_cfg_t;
 		((iomux_v3_cfg_t)(_sel_input_ofs) << MUX_SEL_INPUT_OFS_SHIFT) | \
 		((iomux_v3_cfg_t)(_sel_input) << MUX_SEL_INPUT_SHIFT))
 
+
+struct iomux_v3_pad_configuration {
+	u64 mux_ctrl_ofs  : 12;
+	u64 pad_ctrl_ofs  : 12;
+	u64 sel_input_ofs : 12;
+	u64 mux_mode      : 5;
+	u64 pad_ctrl      : 18;
+	u64 sel_inp       : 4;
+	u64 reserved      : 1;
+} __packed;
+
+union iomux_v3_pad {
+	iomux_v3_cfg_t raw;
+	struct iomux_v3_pad_configuration cfg;
+};
+
 #define NEW_PAD_CTRL(cfg, pad)	(((cfg) & ~MUX_PAD_CTRL_MASK) | MUX_PAD_CTRL(pad))
 /*
  * Use to set PAD control
