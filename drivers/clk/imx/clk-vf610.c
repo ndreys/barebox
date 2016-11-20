@@ -427,6 +427,9 @@ static void __init vf610_clocks_init(struct device_node *ccm_node)
 	clk_set_parent(clk[VF610_CLK_ESDHC1_SEL], clk[VF610_CLK_PLL1_PFD3]);
 	clk_set_rate(clk[VF610_CLK_ESDHC1_DIV], clk_get_rate(clk[VF610_CLK_PLL1_PFD3]) / 9);
 
+	clk_set_parent(clk[VF610_CLK_ESDHC0_SEL], clk[VF610_CLK_PLL1_PFD3]);
+	clk_set_rate(clk[VF610_CLK_ESDHC0_DIV], clk_get_rate(clk[VF610_CLK_PLL1_PFD3]) / 9);
+
 	clk_set_parent(clk[VF610_CLK_SAI0_SEL], clk[VF610_CLK_AUDIO_EXT]);
 	clk_set_parent(clk[VF610_CLK_SAI1_SEL], clk[VF610_CLK_AUDIO_EXT]);
 	clk_set_parent(clk[VF610_CLK_SAI2_SEL], clk[VF610_CLK_AUDIO_EXT]);
