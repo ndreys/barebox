@@ -39,21 +39,6 @@ struct vf610_gpio_port {
 #define GPIO_PTOR		0x0c
 #define GPIO_PDIR		0x10
 
-#define PORT_PCR(n)		((n) * 0x4)
-#define PORT_PCR_IRQC_OFFSET	16
-
-#define PORT_ISFR		0xa0
-#define PORT_DFER		0xc0
-#define PORT_DFCR		0xc4
-#define PORT_DFWR		0xc8
-
-#define PORT_INT_OFF		0x0
-#define PORT_INT_LOGIC_ZERO	0x8
-#define PORT_INT_RISING_EDGE	0x9
-#define PORT_INT_FALLING_EDGE	0xa
-#define PORT_INT_EITHER_EDGE	0xb
-#define PORT_INT_LOGIC_ONE	0xc
-
 static const struct of_device_id vf610_gpio_dt_ids[] = {
 	{ .compatible = "fsl,vf610-gpio" },
 	{ /* sentinel */ }
