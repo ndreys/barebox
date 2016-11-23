@@ -49,6 +49,11 @@
 		};
 	};
 
+	device-info {
+		nvmem-cells = <&lru_part_number>;
+		nvmem-cell-names = "lru-part-number";
+	};
+
 	aliases {
 		ethernet0 = &fec;
 		ethernet1 = &i210;
