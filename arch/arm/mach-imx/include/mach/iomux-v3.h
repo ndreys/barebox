@@ -147,6 +147,23 @@ static inline void iomux_v3_setup_pad(void __iomem *iomux, unsigned int flags,
 		writel(input_val, iomux + input_reg);
 }
 
+static inline void imx_setup_pad(void __iomem *iomux, iomux_v3_cfg_t __pad)
+{
+	union iomux_v3_pad pad = { .raw = __pad };
+	uint32_t pad_ctrl;
+
+	pad_ctrl = (pad.cfg.pad_ctrl & NO_PAD_CTRL) ? 0 : pad.cfg.pad_ctrl,
+
+	iomux_v3_setup_pad(iomux, 0,
+			   pad.cfg.mux_ctrl_ofs,
+			   pad.cfg.pad_ctrl_ofs,
+			   pad.cfg.sel_input_ofs,
+			   pad.cfg.mux_mode,
+			   pad_ctrl,
+			   pad.cfg.sel_inp);
+}
+
+
 
 /*
  * setups a single pad in the iomuxer
