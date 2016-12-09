@@ -84,7 +84,7 @@ struct ocotp_priv {
 	struct device_d dev;
 	int permanent_write_enable;
 	int sense_enable;
-	char ethaddr[6];
+	char ethaddr[MAC_BYTES];
 	struct regmap_config map_config;
 	const struct imx_ocotp_data *data;
 };
@@ -409,25 +409,24 @@ static void memreverse(void *dest, const void *src, size_t n)
 static int imx_ocotp_get_mac(struct param_d *param, void *priv)
 {
 	struct ocotp_priv *ocotp_priv = priv;
-	char buf[8];
+	char buf[MAC_BYTES];
 	int ret;
 
 	ret = regmap_bulk_read(ocotp_priv->map, MAC_OFFSET, buf, MAC_BYTES);
 	if (ret < 0)
 		return ret;
 
-	memreverse(ocotp_priv->ethaddr, buf, 6);
+	memreverse(ocotp_priv->ethaddr, buf, MAC_BYTES);
 	return 0;
 }
 
 static int imx_ocotp_set_mac(struct param_d *param, void *priv)
 {
 	struct ocotp_priv *ocotp_priv = priv;
-	char buf[8];
+	char buf[MAC_BYTES];
 	int ret;
 
-	memreverse(buf, ocotp_priv->ethaddr, 6);
-	buf[6] = 0; buf[7] = 0;
+	memreverse(buf, ocotp_priv->ethaddr, MAC_BYTES);
 
 	ret = regmap_bulk_write(ocotp_priv->map, MAC_OFFSET, buf, MAC_BYTES);
 	if (ret < 0)
