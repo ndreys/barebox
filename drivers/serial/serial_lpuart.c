@@ -172,7 +172,7 @@ static int lpuart_serial_probe(struct device_d *dev)
 
 	lpuart_setup_with_fifo(lpuart->base,
 			       clk_get_rate(lpuart->clk),
-			       15);
+			       0);
 
 	ret = console_register(cdev);
 	if (!ret) {
