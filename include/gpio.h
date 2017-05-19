@@ -41,6 +41,9 @@ static inline int gpio_is_valid(int gpio)
 #define GPIOF_INIT_LOW	(0 << 1)
 #define GPIOF_INIT_HIGH	(1 << 1)
 
+#define GPIOF_ACTIVE_HIGH	(0 << 2)
+#define GPIOF_ACTIVE_LOW	(1 << 2)
+
 #define GPIOF_IN		(GPIOF_DIR_IN)
 #define GPIOF_OUT_INIT_LOW	(GPIOF_DIR_OUT | GPIOF_INIT_LOW)
 #define GPIOF_OUT_INIT_HIGH	(GPIOF_DIR_OUT | GPIOF_INIT_HIGH)

@@ -13,6 +13,7 @@ static LIST_HEAD(chip_list);
 struct gpio_info {
 	struct gpio_chip *chip;
 	bool requested;
+	bool active_low;
 	char *label;
 };
 
@@ -45,6 +46,15 @@ static struct gpio_info *gpio_to_desc(unsigned gpio)
 	return NULL;
 }
 
+static int gpio_adjust_value(struct gpio_info *gi,
+			     int value)
+{
+	if (value < 0)
+		return value;
+
+	return !!value ^ gi->active_low;
+}
+
 int gpio_request(unsigned gpio, const char *label)
 {
 	struct gpio_info *gi = gpio_to_desc(gpio);
@@ -69,6 +79,7 @@ int gpio_request(unsigned gpio, const char *label)
 	}
 
 	gi->requested = true;
+	gi->active_low = false;
 	gi->label = xstrdup(label);
 
 done:
@@ -93,6 +104,7 @@ void gpio_free(unsigned gpio)
 		gi->chip->ops->free(gi->chip, gpio - gi->chip->base);
 
 	gi->requested = false;
+	gi->active_low = false;
 	free(gi->label);
 	gi->label = NULL;
 }
@@ -110,6 +122,11 @@ int gpio_request_one(unsigned gpio, unsigned long flags, const char *label)
 	err = gpio_request(gpio, label);
 	if (err)
 		return err;
+
+	if (flags & GPIOF_ACTIVE_LOW) {
+		struct gpio_info *gi = gpio_to_desc(gpio);
+		gi->active_low = true;
+	}
 
 	if (flags & GPIOF_DIR_IN)
 		err = gpio_direction_input(gpio);
@@ -173,8 +190,10 @@ void gpio_set_value(unsigned gpio, int value)
 	if (gpio_ensure_requested(gi, gpio))
 		return;
 
-	if (gi->chip->ops->set)
-		gi->chip->ops->set(gi->chip, gpio - gi->chip->base, value);
+	if (gi->chip->ops->set) {
+		gi->chip->ops->set(gi->chip, gpio - gi->chip->base,
+				   gpio_adjust_value(gi, value));
+	}
 }
 EXPORT_SYMBOL(gpio_set_value);
 
@@ -192,7 +211,10 @@ int gpio_get_value(unsigned gpio)
 
 	if (!gi->chip->ops->get)
 		return -ENOSYS;
-	return gi->chip->ops->get(gi->chip, gpio - gi->chip->base);
+
+	ret = gi->chip->ops->get(gi->chip, gpio - gi->chip->base);
+
+	return gpio_adjust_value(gi, ret);
 }
 EXPORT_SYMBOL(gpio_get_value);
 
@@ -211,7 +233,7 @@ int gpio_direction_output(unsigned gpio, int value)
 	if (!gi->chip->ops->direction_output)
 		return -ENOSYS;
 	return gi->chip->ops->direction_output(gi->chip, gpio - gi->chip->base,
-					       value);
+					       gpio_adjust_value(gi, value));
 }
 EXPORT_SYMBOL(gpio_direction_output);
 
@@ -229,7 +251,10 @@ int gpio_direction_input(unsigned gpio)
 
 	if (!gi->chip->ops->direction_input)
 		return -ENOSYS;
-	return gi->chip->ops->direction_input(gi->chip, gpio - gi->chip->base);
+
+	ret = gi->chip->ops->direction_input(gi->chip, gpio - gi->chip->base);
+
+	return gpio_adjust_value(gi, ret);
 }
 EXPORT_SYMBOL(gpio_direction_input);
 
@@ -334,7 +359,7 @@ static int do_gpiolib(int argc, char *argv[])
 		printf("  GPIO %*d: %*s %*s %*s  %s\n", 4, i,
 			3, (dir < 0) ? "unk" : ((dir == GPIOF_DIR_IN) ? "in" : "out"),
 			3, (val < 0) ? "unk" : ((val == 0) ? "lo" : "hi"),
-			9, gi->requested ? "true" : "false",
+		        12, gi->requested ? (gi->active_low ? "active low" : "true") : "false",
 			(gi->requested && gi->label) ? gi->label : "");
 	}
 
