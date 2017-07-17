@@ -396,6 +396,10 @@ config MACH_ZII_VF610_DEV
 	select ARCH_VF610
 	select CLKDEV_LOOKUP
 
+config MACH_FREESCALE_MX7_SABRESD
+	bool "NXP i.MX7 SabreSD Board"
+	select ARCH_IMX7
+
 endif
 
 # ----------------------------------------------------------
