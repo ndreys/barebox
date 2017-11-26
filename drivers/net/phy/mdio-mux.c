@@ -130,6 +130,7 @@ int mdio_mux_init(struct device_d *dev,
 		}
 	}
 
+	parent_bus->is_multiplexed = true;
 	return 0;
 }
 EXPORT_SYMBOL_GPL(mdio_mux_init);
