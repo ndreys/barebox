@@ -554,3 +554,8 @@ pblx-$(CONFIG_MACH_FREESCALE_MX7_SABRESD) += start_imx7d_sabresd
 CFG_start_imx7d_sabresd.pblx.imximg = $(board)/freescale-mx7-sabresd/flash-header-mx7-sabresd.imxcfg
 FILE_barebox-freescale-mx7-sabresd.img = start_imx7d_sabresd.pblx.imximg
 image-$(CONFIG_MACH_FREESCALE_MX7_SABRESD) += barebox-freescale-mx7-sabresd.img
+
+pblx-$(CONFIG_MACH_ZII_IMX7D_RPU2) += start_zii_imx7d_rpu2
+CFG_start_zii_imx7d_rpu2.pblx.imximg = $(board)/zii-imx7d-rpu2/flash-header-zii-imx7d-rpu2.imxcfg
+FILE_barebox-zii-imx7d-rpu2.img = start_zii_imx7d_rpu2.pblx.imximg
+image-$(CONFIG_MACH_ZII_IMX7D_RPU2) += barebox-zii-imx7d-rpu2.img
