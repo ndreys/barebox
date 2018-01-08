@@ -6,6 +6,8 @@
 #include <errno.h>
 #include <fs.h>
 #include <malloc.h>
+#include <linux/font.h>
+#include <linux/ctype.h>
 
 static void __illuminate(struct fb_info *info,
 			 int x, int y,
@@ -236,3 +238,66 @@ void gu_fill_rounded_rectangle(struct screen *sc,
                             r, g, b, a, 0);
        }
 }
+
+#ifdef CONFIG_FONTS
+static void gu_draw_char(struct screen *sc, const struct font_desc *font,
+			 int ch, int x0, int y0,
+			 u8 fr, u8 fg, u8 fb, u8 fa,
+			 u8 br, u8 bg, u8 bb, u8 ba)
+{
+       const u8 *bitmap = font->data + find_font_index(font, ch);
+       int x, y;
+
+       for (y = 0; y < font->height; y++) {
+               for (x = 0; x < font->width; x++) {
+		       const unsigned index  = y * font->width + x;
+		       const unsigned byte   = index / 8;
+		       const unsigned bit    = 8 - (index % 8);
+		       const bool foreground = bitmap[byte] & BIT(bit);
+
+		       const u8 r = (foreground) ? fr : br;
+		       const u8 g = (foreground) ? fg : bg;
+		       const u8 b = (foreground) ? fb : bb;
+		       const u8 a = (foreground) ? fa : ba;
+
+		       __illuminate(sc->info, x0 + x, y0 + y, r, g, b, a);
+               }
+       }
+}
+
+/**
+ * gu_draw_text -  (x0, y0)
+ *
+ * @sc: screen to draw on
+ * @x0, @y0: coordinates of circle's center
+ * @radius: circle's radius
+ * @r, @g, @b, @a: circle's color
+ *
+ * gu_draw_circle() implements midpoint circle algorithm as can be
+ * found here:
+ *
+ * https://en.wikipedia.org/wiki/Midpoint_circle_algorithm
+ */
+void gu_draw_text(struct screen *sc, const struct font_desc *font,
+		  int x0, int y0, const char *text,
+		  u8 fr, u8 fg, u8 fb, u8 fa,
+		  u8 br, u8 bg, u8 bb, u8 ba)
+{
+	char c;
+	int x = x0;
+	int y = y0;
+
+	BUG_ON(x0 < 0 || y0 < 0);
+
+	while ((c = *text++)) {
+		/*
+		 * Just skip all non-printable characters
+		 */
+		if (isprint(c)) {
+			gu_draw_char(sc, font, c, x, y,
+				     fr, fg, fb, fa, br, bg, bb, ba);
+			x += font->width;
+		}
+	}
+}
+#endif
