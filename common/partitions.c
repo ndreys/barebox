@@ -42,8 +42,7 @@ static LIST_HEAD(partition_parser_list);
  * @param no Partition number
  * @return 0 on success
  */
-static int register_one_partition(struct block_device *blk,
-					struct partition *part, int no)
+static int register_one_partition(struct block_device *blk, struct partition *part)
 {
 	char *partition_name;
 	int ret;
@@ -51,7 +50,7 @@ static int register_one_partition(struct block_device *blk,
 	uint64_t size = part->size * SECTOR_SIZE;
 	struct cdev *cdev;
 
-	partition_name = basprintf("%s.%d", blk->cdev.name, no);
+	partition_name = basprintf("%s.%d", blk->cdev.name, part->number);
 	if (!partition_name)
 		return -ENOMEM;
 	dev_dbg(blk->dev, "Registering partition %s on drive %s\n",
@@ -150,7 +149,7 @@ int parse_partition_table(struct block_device *blk)
 
 	/* at least one partition description found */
 	for (i = 0; i < pdesc->used_entries; i++) {
-		rc = register_one_partition(blk, &pdesc->parts[i], i);
+		rc = register_one_partition(blk, &pdesc->parts[i]);
 		if (rc != 0)
 			dev_err(blk->dev,
 				"Failed to register partition %d on %s (%d)\n",

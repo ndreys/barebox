@@ -20,6 +20,7 @@ struct partition {
 	char partuuid[MAX_PARTUUID_STR];
 	uint64_t first_sec;
 	uint64_t size;
+	int number;
 };
 
 struct partition_desc {
@@ -35,5 +36,7 @@ struct partition_parser {
 };
 
 int partition_parser_register(struct partition_parser *p);
+
+static const bool linux_numbering = IS_ENABLED(CONFIG_PARTITION_LINUX_NUMBERING);
 
 #endif /* __PARTITIONS_PARSER_H__ */

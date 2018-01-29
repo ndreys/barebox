@@ -786,6 +786,17 @@ config PARTITION
 	bool
 	prompt "Enable Partitions"
 
+config PARTITION_LINUX_NUMBERING
+        bool "Linux-like partition numbering"
+	depends on PARTITION
+	help
+	  This enables Barebox to assign partition numbers in a way
+	  that Linux kernel does. By default Barebox just number all
+	  partition sequentually starting from index 0, whereas Linux
+	  start numbering partitions from index 1. Unlike Barebox,
+	  Linux also always assigns index 5 to first extended DOS
+	  partition.
+
 source common/partitions/Kconfig
 
 config ENV_HANDLING
