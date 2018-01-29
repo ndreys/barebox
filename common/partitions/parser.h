@@ -20,6 +20,7 @@ struct partition {
 	char partuuid[MAX_PARTUUID_STR];
 	uint64_t first_sec;
 	uint64_t size;
+	int number;
 };
 
 struct partition_desc {
