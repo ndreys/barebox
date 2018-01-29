@@ -21,7 +21,6 @@
 
 #include "parser.h"
 
-
 enum {
 /* These three have identical behaviour; use the second one if DOS FDISK gets
    confused about extended/logical partitions starting past cylinder 1023. */
@@ -170,6 +169,8 @@ static void dos_extended_partition(struct block_device *blk, struct partition_de
 			get_unaligned_le32(&table[0].partition_start);
 		pd->parts[n].size = get_unaligned_le32(&table[0].partition_size);
 		pd->parts[n].dos_partition_type = table[0].type;
+		pd->parts[n].number = linux_numbering ? partno : n;
+
 		if (signature)
 			sprintf(pd->parts[n].partuuid, "%08x-%02u",
 				signature, partno);
@@ -224,6 +225,7 @@ static void dos_partition(void *buf, struct block_device *blk,
 			pd->parts[n].first_sec = pentry.first_sec;
 			pd->parts[n].size = pentry.size;
 			pd->parts[n].dos_partition_type = pentry.dos_partition_type;
+			pd->parts[n].number = i + linux_numbering;
 			if (signature)
 				sprintf(pd->parts[n].partuuid, "%08x-%02d",
 						signature, i + 1);

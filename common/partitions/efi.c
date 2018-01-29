@@ -456,6 +456,7 @@ static void efi_partition(void *buf, struct block_device *blk,
 		pentry = &pd->parts[pd->used_entries];
 		pentry->first_sec = le64_to_cpu(ptes[i].starting_lba);
 		pentry->size = le64_to_cpu(ptes[i].ending_lba) - pentry->first_sec;
+		pentry->number = pd->used_entries + linux_numbering;
 		pentry->size++;
 		part_set_efi_name(&ptes[i], pentry->name);
 		snprintf(pentry->partuuid, sizeof(pentry->partuuid), "%pUl", &ptes[i].unique_partition_guid);
