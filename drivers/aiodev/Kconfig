@@ -20,4 +20,10 @@ config LM75
 	help
 	  Support for LM75 and similar devices
 
+config RAVE_SP_AIODEV
+	tristate "Driver for sensors present in RAVE SP"
+	depends on RAVE_SP_CORE
+	help
+	  Support for accessing sensor information provided by RAVE SP
+	  devices
 endif
