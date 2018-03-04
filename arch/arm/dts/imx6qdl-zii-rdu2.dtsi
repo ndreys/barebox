@@ -264,6 +264,10 @@
 				reg = <0>;
 			};
 		};
+
+		backlight {
+			compatible = "zii,rave-sp-backlight";
+		};
 	};
 };
 
