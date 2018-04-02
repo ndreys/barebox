@@ -309,6 +309,18 @@ config MALLOC_SIZE
 	hex
 	default 0x400000
 	prompt "malloc area size"
+
+config BSS_SIZE
+	hex
+	default 0x100000
+	prompt "BSS size"
+	help
+	  When using compressed images in conjunction with relocatable
+	  images the PBL code must pick a suitable place where to
+	  uncompress the barebox image. For doing this the PBL code
+	  must know the size of the final image including the BSS
+	  segment. The BSS size is unknown to the PBL code, so define
+	  a maximum BSS size here.
 endmenu
 
 config BROKEN
