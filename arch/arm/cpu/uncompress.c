@@ -76,7 +76,7 @@ void __noreturn barebox_multi_pbl_start(unsigned long membase,
 
 	if (IS_ENABLED(CONFIG_RELOCATABLE))
 		barebox_base = arm_mem_barebox_image(membase, endmem,
-						     uncompressed_len + MAX_BSS_SIZE);
+						     uncompressed_len + BSS_SIZE);
 	else
 		barebox_base = TEXT_BASE;
 

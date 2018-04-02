@@ -65,7 +65,7 @@ __noreturn void barebox_single_pbl_start(unsigned long membase,
 	uncompressed_len = get_unaligned((const u32 *)(pg_start + pg_len - 4));
 
 	if (IS_ENABLED(CONFIG_RELOCATABLE))
-		barebox_base = arm_mem_barebox_image(membase, endmem, uncompressed_len + MAX_BSS_SIZE);
+		barebox_base = arm_mem_barebox_image(membase, endmem, uncompressed_len + BSS_SIZE);
 	else
 		barebox_base = TEXT_BASE;
 
