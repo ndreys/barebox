@@ -158,7 +158,10 @@ __noreturn void barebox_non_pbl_start(unsigned long membase,
 
 	arm_stack_top = arm_mem_stack_top(membase, endmem);
 	arm_barebox_size = barebox_size;
-	malloc_end = barebox_base;
+	if (IS_ENABLED(CONFIG_MEMORY_LAYOUT_FIXED))
+		malloc_end = MALLOC_BASE + MALLOC_SIZE;
+	else
+		malloc_end = barebox_base;
 
 	if (IS_ENABLED(CONFIG_MMU_EARLY)) {
 		unsigned long ttb = arm_mem_ttb(membase, endmem);
