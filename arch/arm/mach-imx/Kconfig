@@ -40,6 +40,7 @@ config ARCH_TEXT_BASE
 	default 0x4fc00000 if MACH_VARISCITE_MX6
 	default 0x4fc00000 if MACH_PHYTEC_SOM_IMX6
 	default 0x9fc00000 if MACH_WARP7
+	default 0x3f000000 if MACH_VF610_OCRAM
 
 config ARCH_IMX_IMXIMAGE
 	bool
@@ -658,6 +659,14 @@ comment "i.MX53 Boards"
 config MACH_FREESCALE_MX53_SMD
 	bool "Freescale i.MX53 SMD"
 	select ARCH_IMX53
+
+comment "Vybrid VF610 Boards"
+
+config MACH_VF610_OCRAM
+	bool "Freescale VF610 OCRAM"
+	depends on !RELOCATABLE
+	select ARCH_VF610
+	select HAVE_CONFIGURABLE_MEMORY_LAYOUT
 
 endchoice
 

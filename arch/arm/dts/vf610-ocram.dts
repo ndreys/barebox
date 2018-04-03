@@ -1,0 +1,72 @@
+/*
+ * Copyright 2013 Freescale Semiconductor, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ */
+
+/dts-v1/;
+#include <arm/vf610.dtsi>
+#include "vf610-ddrmc.dtsi"
+
+/ {
+	model = "VF610 OCRAM";
+	compatible = "fsl,vf610-ocram", "fsl,vf610";
+
+	/* memory { */
+	/* 	reg = <0x80000000 0x8000000>; */
+	/* }; */
+};
+
+&iomuxc {
+	vf610-ocram {
+		pinctrl_uart0: uart0grp {
+			fsl,pins = <
+				VF610_PAD_PTB10__UART0_TX	0x21a2
+				VF610_PAD_PTB11__UART0_RX	0x21a1
+			>;
+		};
+
+		pinctrl_i2c0: i2c0grp {
+			fsl,pins = <
+				VF610_PAD_PTB14__I2C0_SCL	0x37ff
+				VF610_PAD_PTB15__I2C0_SDA	0x37ff
+			>;
+		};
+
+		pinctrl_i2c0_gpio: i2c0grp-gpio {
+			fsl,pins = <
+				VF610_PAD_PTB14__GPIO_36	0x31c2
+				VF610_PAD_PTB15__GPIO_37	0x31c2
+			>;
+		};
+	};
+};
+
+&i2c0 {
+	clock-frequency = <100000>;
+	pinctrl-names = "default", "gpio";
+	pinctrl-0 = <&pinctrl_i2c0>;
+	pinctrl-1 = <&pinctrl_i2c0_gpio>;
+	scl-gpios = <&gpio1 4 GPIO_ACTIVE_HIGH>;
+	sda-gpios = <&gpio1 5 GPIO_ACTIVE_HIGH>;
+	status = "okay";
+
+	at24c04@50 {
+		compatible = "atmel,24c04";
+		reg = <0x50>;
+	};
+
+	at24c04@52 {
+		compatible = "atmel,24c04";
+		reg = <0x52>;
+	};
+};
+
+&uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart0>;
+	status = "okay";
+};
