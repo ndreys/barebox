@@ -101,7 +101,10 @@ void *barebox_arm_boot_dtb(void);
 static inline unsigned long arm_mem_stack_top(unsigned long membase,
 					      unsigned long endmem)
 {
-	return endmem - SZ_64K;
+	if (IS_ENABLED(CONFIG_MEMORY_LAYOUT_FIXED))
+		return STACK_BASE + STACK_SIZE;
+	else
+		return endmem - SZ_64K;
 }
 
 static inline unsigned long arm_mem_stack(unsigned long membase,
