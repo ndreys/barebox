@@ -155,19 +155,9 @@ struct mem_test_resource *mem_test_biggest_region(struct list_head *list)
 	return best;
 }
 
-static void mem_test_report_failure(const char *failure_description,
-				    resource_size_t expected_value,
-				    resource_size_t actual_value,
-				    volatile resource_size_t *address)
-{
-	printf("FAILURE (%s): "
-	       "expected 0x%08x, actual 0x%08x at address 0x%08x.\n",
-	       failure_description, expected_value, actual_value,
-	       (resource_size_t)address);
-}
-
 int mem_test_bus_integrity(resource_size_t _start,
-			   resource_size_t _end)
+			   resource_size_t _end,
+			   mem_test_report_failure_func report_failure)
 {
 	static const resource_size_t bitpattern[] = {
 		0x00000001,	/* single bit */
@@ -225,8 +215,8 @@ int mem_test_bus_integrity(resource_size_t _start,
 			*dummy = ~val;
 			readback = *start;
 			if (readback != val) {
-				mem_test_report_failure("data line",
-							val, readback, start);
+				report_failure("data line",
+					       val, readback, start);
 				return -EIO;
 			}
 
@@ -234,8 +224,8 @@ int mem_test_bus_integrity(resource_size_t _start,
 			*dummy = val;
 			readback = *start;
 			if (readback != ~val) {
-				mem_test_report_failure("data line",
-							~val, readback, start);
+				report_failure("data line",
+					       ~val, readback, start);
 				return -EIO;
 			}
 		}
@@ -309,8 +299,8 @@ int mem_test_bus_integrity(resource_size_t _start,
 	for (offset = 1; offset <= num_words; offset <<= 1) {
 		temp = start[offset];
 		if (temp != pattern) {
-			mem_test_report_failure("address bit stuck high",
-						pattern, temp, &start[offset]);
+			report_failure("address bit stuck high",
+				       pattern, temp, &start[offset]);
 			return -EIO;
 		}
 	}
@@ -335,7 +325,7 @@ int mem_test_bus_integrity(resource_size_t _start,
 
 			if ((temp != pattern) &&
 					(offset != offset2)) {
-				mem_test_report_failure(
+				report_failure(
 					"address bit stuck low or shorted",
 					pattern, temp, &start[offset]);
 				return -EIO;
@@ -361,7 +351,9 @@ static int update_progress(resource_size_t offset)
 	return 0;
 }
 
-int mem_test_moving_inversions(resource_size_t _start, resource_size_t _end)
+int mem_test_moving_inversions(resource_size_t _start,
+			       resource_size_t _end,
+			       mem_test_report_failure_func report_failure)
 {
 	volatile resource_size_t *start, num_words, offset, temp, anti_pattern;
 	int ret;
@@ -407,10 +399,9 @@ int mem_test_moving_inversions(resource_size_t _start, resource_size_t _end)
 
 		temp = start[offset];
 		if (temp != (offset + 1)) {
-			printf("\n");
-			mem_test_report_failure("read/write",
-						(offset + 1),
-						temp, &start[offset]);
+			report_failure("read/write",
+				       (offset + 1),
+				       temp, &start[offset]);
 			return -EIO;
 		}
 
@@ -428,10 +419,9 @@ int mem_test_moving_inversions(resource_size_t _start, resource_size_t _end)
 		temp = start[offset];
 
 		if (temp != anti_pattern) {
-			printf("\n");
-			mem_test_report_failure("read/write",
-						anti_pattern,
-						temp, &start[offset]);
+			report_failure("read/write",
+				       anti_pattern,
+				       temp, &start[offset]);
 			return -EIO;
 		}
 

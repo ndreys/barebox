@@ -28,6 +28,17 @@
 #include <memtest.h>
 #include <mmu.h>
 
+static void report_failure(const char *failure_description,
+			   resource_size_t expected_value,
+			   resource_size_t actual_value,
+			   volatile resource_size_t *address)
+{
+	printf("\nFAILURE (%s): "
+	       "expected 0x%08x, actual 0x%08x at address 0x%08x.\n",
+	       failure_description, expected_value, actual_value,
+	       (resource_size_t)address);
+}
+
 static int do_test_one_area(struct mem_test_resource *r, int bus_only,
 		unsigned cache_flag)
 {
@@ -39,14 +50,14 @@ static int do_test_one_area(struct mem_test_resource *r, int bus_only,
 
 	remap_range((void *)r->r->start, resource_size(r->r), cache_flag);
 
-	ret = mem_test_bus_integrity(r->r->start, r->r->end);
+	ret = mem_test_bus_integrity(r->r->start, r->r->end, report_failure);
 	if (ret < 0)
 		return ret;
 
 	if (bus_only)
 		return 0;
 
-	ret = mem_test_moving_inversions(r->r->start, r->r->end);
+	ret = mem_test_moving_inversions(r->r->start, r->r->end, report_failure);
 	if (ret < 0)
 		return ret;
 	printf("done.\n\n");
