@@ -4,3 +4,4 @@ obj-y += getenv.o
 obj-y += md.o
 obj-y += mw.o
 obj-y += reset.o
+obj-y += memtest.o

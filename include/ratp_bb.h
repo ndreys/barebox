@@ -18,6 +18,9 @@
 #define BB_RATP_TYPE_MW			12
 #define BB_RATP_TYPE_MW_RETURN		13
 #define BB_RATP_TYPE_RESET		14
+#define BB_RATP_TYPE_MEMTEST		15
+#define BB_RATP_TYPE_MEMTEST_RETURN	16
+#define BB_RATP_TYPE_MEMTEST_PROGRESS	17
 
 struct ratp_bb {
 	uint16_t type;
