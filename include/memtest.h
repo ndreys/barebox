@@ -15,17 +15,21 @@ struct mem_test_resource *mem_test_biggest_region(struct list_head *list);
 typedef void (* mem_test_report_failure_func) (const char *failure_description,
 					       resource_size_t expected_value,
 					       resource_size_t actual_value,
-					       volatile resource_size_t *address);
+					       volatile resource_size_t *address,
+					       void *user_data);
 typedef int (* mem_test_report_progress_func) (const char *description,
 					       resource_size_t offset,
-					       resource_size_t max);
+					       resource_size_t max,
+					       void *user_data);
 int mem_test_bus_integrity(resource_size_t _start,
 			   resource_size_t _end,
 			   mem_test_report_progress_func report_progress,
-			   mem_test_report_failure_func report_failure);
+			   mem_test_report_failure_func report_failure,
+			   void *user_data);
 int mem_test_moving_inversions(resource_size_t _start,
 			       resource_size_t _end,
 			       mem_test_report_progress_func report_progress,
-			       mem_test_report_failure_func report_failure);
+			       mem_test_report_failure_func report_failure,
+			       void *user_data);
 
 #endif /* __MEMTEST_H */

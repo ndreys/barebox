@@ -157,7 +157,8 @@ struct mem_test_resource *mem_test_biggest_region(struct list_head *list)
 int mem_test_bus_integrity(resource_size_t _start,
 			   resource_size_t _end,
 			   mem_test_report_progress_func report_progress,
-			   mem_test_report_failure_func report_failure)
+			   mem_test_report_failure_func report_failure,
+			   void *user_data)
 {
 	static const resource_size_t bitpattern[] = {
 		0x00000001,	/* single bit */
@@ -188,7 +189,7 @@ int mem_test_bus_integrity(resource_size_t _start,
 	num_words = (_end - _start + 1)/sizeof(resource_size_t);
 
 	/* No numeric progress reporting in this test */
-	report_progress("Starting data line test.", 0, 0);
+	report_progress("Starting data line test.", 0, 0, user_data);
 
 	/*
 	 * Data line test: write a pattern to the first
@@ -217,7 +218,7 @@ int mem_test_bus_integrity(resource_size_t _start,
 			readback = *start;
 			if (readback != val) {
 				report_failure("data line",
-					       val, readback, start);
+					       val, readback, start, user_data);
 				return -EIO;
 			}
 
@@ -226,7 +227,7 @@ int mem_test_bus_integrity(resource_size_t _start,
 			readback = *start;
 			if (readback != ~val) {
 				report_failure("data line",
-					       ~val, readback, start);
+					       ~val, readback, start, user_data);
 				return -EIO;
 			}
 		}
@@ -292,7 +293,7 @@ int mem_test_bus_integrity(resource_size_t _start,
 	 */
 	start[0] = anti_pattern;
 
-	report_progress("Check for address bits stuck high.", 0, 0);
+	report_progress("Check for address bits stuck high.", 0, 0, user_data);
 
 	/*
 	 * Check for address bits stuck high.
@@ -301,7 +302,7 @@ int mem_test_bus_integrity(resource_size_t _start,
 		temp = start[offset];
 		if (temp != pattern) {
 			report_failure("address bit stuck high",
-				       pattern, temp, &start[offset]);
+				       pattern, temp, &start[offset], user_data);
 			return -EIO;
 		}
 	}
@@ -312,7 +313,7 @@ int mem_test_bus_integrity(resource_size_t _start,
 	start[0] = pattern;
 
 	report_progress("Check for address bits stuck "
-			"low or shorted.", 0, 0);
+			"low or shorted.", 0, 0, user_data);
 
 	/*
 	 * Check for address bits stuck low or shorted.
@@ -328,7 +329,7 @@ int mem_test_bus_integrity(resource_size_t _start,
 					(offset != offset2)) {
 				report_failure(
 					"address bit stuck low or shorted",
-					pattern, temp, &start[offset]);
+					pattern, temp, &start[offset], user_data);
 				return -EIO;
 			}
 		}
@@ -344,7 +345,8 @@ int mem_test_bus_integrity(resource_size_t _start,
 int mem_test_moving_inversions(resource_size_t _start,
 			       resource_size_t _end,
 			       mem_test_report_progress_func report_progress,
-			       mem_test_report_failure_func report_failure)
+			       mem_test_report_failure_func report_failure,
+			       void *user_data)
 {
 	volatile resource_size_t *start, num_words, offset, temp, anti_pattern, max_progress;
 	int ret;
@@ -359,9 +361,9 @@ int mem_test_moving_inversions(resource_size_t _start,
 	num_words = (_end - _start + 1)/sizeof(resource_size_t);
 	max_progress = 3 * num_words;
 
-	report_progress("Starting moving inversions test of RAM:", 0, 0);
+	report_progress("Starting moving inversions test of RAM:", 0, 0, user_data);
 	report_progress("Fill with address, compare, fill with "
-			"inverted address, compare again", 0, 0);
+			"inverted address, compare again", 0, 0, user_data);
 
 	/*
 	 * Description: Test the integrity of a physical
@@ -377,7 +379,7 @@ int mem_test_moving_inversions(resource_size_t _start,
 	/* Fill memory with a known pattern */
 	for (offset = 0; offset < num_words; offset++) {
 		if (SHOULD_REPORT_PROGRESS(offset)) {
-		    ret = report_progress(NULL, offset, max_progress);
+		    ret = report_progress(NULL, offset, max_progress, user_data);
 		    if (ret)
 			    return ret;
 		}
@@ -388,7 +390,7 @@ int mem_test_moving_inversions(resource_size_t _start,
 	/* Check each location and invert it for the second pass */
 	for (offset = 0; offset < num_words; offset++) {
 		if (SHOULD_REPORT_PROGRESS(offset)) {
-		    ret = report_progress(NULL, num_words + offset, max_progress);
+		    ret = report_progress(NULL, num_words + offset, max_progress, user_data);
 		    if (ret)
 			    return ret;
 		}
@@ -397,7 +399,7 @@ int mem_test_moving_inversions(resource_size_t _start,
 		if (temp != (offset + 1)) {
 			report_failure("read/write",
 				       (offset + 1),
-				       temp, &start[offset]);
+				       temp, &start[offset], user_data);
 			return -EIO;
 		}
 
@@ -408,7 +410,7 @@ int mem_test_moving_inversions(resource_size_t _start,
 	/* Check each location for the inverted pattern and zero it */
 	for (offset = 0; offset < num_words; offset++) {
 		if (SHOULD_REPORT_PROGRESS(offset)) {
-		    ret = report_progress(NULL, 2 * num_words + offset, max_progress);
+		    ret = report_progress(NULL, 2 * num_words + offset, max_progress, user_data);
 		    if (ret)
 			    return ret;
 		}
@@ -419,7 +421,7 @@ int mem_test_moving_inversions(resource_size_t _start,
 		if (temp != anti_pattern) {
 			report_failure("read/write",
 				       anti_pattern,
-				       temp, &start[offset]);
+				       temp, &start[offset], user_data);
 			return -EIO;
 		}
 
@@ -427,7 +429,7 @@ int mem_test_moving_inversions(resource_size_t _start,
 	}
 
 	/* end of progress reporting */
-	report_progress(NULL, max_progress, max_progress);
+	report_progress(NULL, max_progress, max_progress, user_data);
 
 	return 0;
 }
