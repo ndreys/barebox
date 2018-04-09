@@ -26,6 +26,7 @@
 #include <common.h>
 #include <errno.h>
 #include <memtest.h>
+#include <progress.h>
 #include <mmu.h>
 
 static void report_failure(const char *failure_description,
@@ -39,6 +40,35 @@ static void report_failure(const char *failure_description,
 	       (resource_size_t)address);
 }
 
+static int report_progress (const char *description,
+			    resource_size_t offset,
+			    resource_size_t max_progress)
+{
+	if (description)
+		printf("%s\n", description);
+
+	if (offset == 0 && max_progress == 0)
+		return 0;
+
+	/* On first numeric progress report, initialize progress bar */
+	if (offset == 0 && max_progress != 0) {
+		init_progression_bar(max_progress);
+		return 0;
+	}
+
+	/* On last progress report, end progress bar */
+	if (offset == max_progress) {
+		printf("\n");
+		return 0;
+	}
+
+	/* Show update in progress bar, unless we've been asked to quit */
+	if (ctrlc())
+		return -EINTR;
+	show_progress(offset);
+	return 0;
+}
+
 static int do_test_one_area(struct mem_test_resource *r, int bus_only,
 		unsigned cache_flag)
 {
@@ -50,14 +80,16 @@ static int do_test_one_area(struct mem_test_resource *r, int bus_only,
 
 	remap_range((void *)r->r->start, resource_size(r->r), cache_flag);
 
-	ret = mem_test_bus_integrity(r->r->start, r->r->end, report_failure);
+	ret = mem_test_bus_integrity(r->r->start, r->r->end,
+				     report_progress, report_failure);
 	if (ret < 0)
 		return ret;
 
 	if (bus_only)
 		return 0;
 
-	ret = mem_test_moving_inversions(r->r->start, r->r->end, report_failure);
+	ret = mem_test_moving_inversions(r->r->start, r->r->end,
+					 report_progress, report_failure);
 	if (ret < 0)
 		return ret;
 	printf("done.\n\n");

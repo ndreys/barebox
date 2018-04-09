@@ -20,7 +20,6 @@
  *
  */
 
-#include <progress.h>
 #include <common.h>
 #include <memory.h>
 #include <types.h>
@@ -157,6 +156,7 @@ struct mem_test_resource *mem_test_biggest_region(struct list_head *list)
 
 int mem_test_bus_integrity(resource_size_t _start,
 			   resource_size_t _end,
+			   mem_test_report_progress_func report_progress,
 			   mem_test_report_failure_func report_failure)
 {
 	static const resource_size_t bitpattern[] = {
@@ -181,13 +181,14 @@ int mem_test_bus_integrity(resource_size_t _start,
 		return -EINVAL;
 
 	start = (resource_size_t *)_start;
-		/*
+	/*
 	 * Point the dummy to start[1]
 	 */
 	dummy = start + 1;
 	num_words = (_end - _start + 1)/sizeof(resource_size_t);
 
-	printf("Starting data line test.\n");
+	/* No numeric progress reporting in this test */
+	report_progress("Starting data line test.", 0, 0);
 
 	/*
 	 * Data line test: write a pattern to the first
@@ -291,7 +292,7 @@ int mem_test_bus_integrity(resource_size_t _start,
 	 */
 	start[0] = anti_pattern;
 
-	printf("Check for address bits stuck high.\n");
+	report_progress("Check for address bits stuck high.", 0, 0);
 
 	/*
 	 * Check for address bits stuck high.
@@ -310,8 +311,8 @@ int mem_test_bus_integrity(resource_size_t _start,
 	 */
 	start[0] = pattern;
 
-	printf("Check for address bits stuck "
-			"low or shorted.\n");
+	report_progress("Check for address bits stuck "
+			"low or shorted.", 0, 0);
 
 	/*
 	 * Check for address bits stuck low or shorted.
@@ -337,25 +338,15 @@ int mem_test_bus_integrity(resource_size_t _start,
 	return 0;
 }
 
-static int update_progress(resource_size_t offset)
-{
-	/* Only check every 4k to reduce overhead */
-	if (offset & (SZ_4K - 1))
-		return 0;
-
-	if (ctrlc())
-		return -EINTR;
-
-	show_progress(offset);
-
-	return 0;
-}
+/* Only report every 4k to reduce overhead */
+#define SHOULD_REPORT_PROGRESS(offset) !(offset & (SZ_4K - 1))
 
 int mem_test_moving_inversions(resource_size_t _start,
 			       resource_size_t _end,
+			       mem_test_report_progress_func report_progress,
 			       mem_test_report_failure_func report_failure)
 {
-	volatile resource_size_t *start, num_words, offset, temp, anti_pattern;
+	volatile resource_size_t *start, num_words, offset, temp, anti_pattern, max_progress;
 	int ret;
 
 	_start = ALIGN(_start, sizeof(resource_size_t));
@@ -366,9 +357,11 @@ int mem_test_moving_inversions(resource_size_t _start,
 
 	start = (resource_size_t *)_start;
 	num_words = (_end - _start + 1)/sizeof(resource_size_t);
+	max_progress = 3 * num_words;
 
-	printf("Starting moving inversions test of RAM:\n"
-	       "Fill with address, compare, fill with inverted address, compare again\n");
+	report_progress("Starting moving inversions test of RAM:", 0, 0);
+	report_progress("Fill with address, compare, fill with "
+			"inverted address, compare again", 0, 0);
 
 	/*
 	 * Description: Test the integrity of a physical
@@ -381,21 +374,24 @@ int mem_test_moving_inversions(resource_size_t _start,
 	 *		selected by the caller.
 	 */
 
-	init_progression_bar(3 * num_words);
-
 	/* Fill memory with a known pattern */
 	for (offset = 0; offset < num_words; offset++) {
-		ret = update_progress(offset);
-		if (ret)
-			return ret;
+		if (SHOULD_REPORT_PROGRESS(offset)) {
+		    ret = report_progress(NULL, offset, max_progress);
+		    if (ret)
+			    return ret;
+		}
+
 		start[offset] = offset + 1;
 	}
 
 	/* Check each location and invert it for the second pass */
 	for (offset = 0; offset < num_words; offset++) {
-		ret = update_progress(num_words + offset);
-		if (ret)
-			return ret;
+		if (SHOULD_REPORT_PROGRESS(offset)) {
+		    ret = report_progress(NULL, num_words + offset, max_progress);
+		    if (ret)
+			    return ret;
+		}
 
 		temp = start[offset];
 		if (temp != (offset + 1)) {
@@ -411,9 +407,11 @@ int mem_test_moving_inversions(resource_size_t _start,
 
 	/* Check each location for the inverted pattern and zero it */
 	for (offset = 0; offset < num_words; offset++) {
-		ret = update_progress(2 * num_words + offset);
-		if (ret)
-			return ret;
+		if (SHOULD_REPORT_PROGRESS(offset)) {
+		    ret = report_progress(NULL, 2 * num_words + offset, max_progress);
+		    if (ret)
+			    return ret;
+		}
 
 		anti_pattern = ~(offset + 1);
 		temp = start[offset];
@@ -427,10 +425,9 @@ int mem_test_moving_inversions(resource_size_t _start,
 
 		start[offset] = 0;
 	}
-	show_progress(3 * num_words);
 
-	/* end of progressbar */
-	printf("\n");
+	/* end of progress reporting */
+	report_progress(NULL, max_progress, max_progress);
 
 	return 0;
 }
