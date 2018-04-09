@@ -103,7 +103,8 @@ out:
 	return ret;
 }
 
-static int ratp_cmd_md(const struct ratp_bb *req, int req_len,
+static int ratp_cmd_md(struct ratp *ratp,
+		       const struct ratp_bb *req, int req_len,
 		       struct ratp_bb **rsp, int *rsp_len)
 {
 	struct ratp_bb_md_request *md_req = (struct ratp_bb_md_request *)req;

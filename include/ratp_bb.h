@@ -2,6 +2,7 @@
 #define __RATP_BB_H
 
 #include <linux/stringify.h>
+#include <ratp.h>
 
 #define BB_RATP_TYPE_COMMAND		1
 #define BB_RATP_TYPE_COMMAND_RETURN	2
@@ -42,7 +43,8 @@ struct ratp_command {
 	struct list_head  list;
 	uint16_t          request_id;
 	uint16_t          response_id;
-	int		(*cmd)(const struct ratp_bb *req,
+	int		(*cmd)(struct ratp *ratp,
+			       const struct ratp_bb *req,
 			       int req_len,
 			       struct ratp_bb **rsp,
 			       int *rsp_len);

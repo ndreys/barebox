@@ -24,7 +24,8 @@
 #include <malloc.h>
 #include <environment.h>
 
-static int ratp_cmd_getenv(const struct ratp_bb *req, int req_len,
+static int ratp_cmd_getenv(struct ratp *ratp,
+			   const struct ratp_bb *req, int req_len,
 			   struct ratp_bb **rsp, int *rsp_len)
 {
 	int dlen = req_len - sizeof (struct ratp_bb);

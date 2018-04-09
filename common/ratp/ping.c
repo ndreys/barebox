@@ -23,7 +23,8 @@
 #include <ratp_bb.h>
 #include <malloc.h>
 
-static int ratp_cmd_ping(const struct ratp_bb *req, int req_len,
+static int ratp_cmd_ping(struct ratp *ratp,
+			 const struct ratp_bb *req, int req_len,
 			 struct ratp_bb **rsp, int *rsp_len)
 {
 	/* Just build response */

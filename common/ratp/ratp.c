@@ -196,7 +196,7 @@ static int ratp_bb_dispatch(struct ratp_ctx *ctx, const void *buf, int len)
 		struct ratp_bb *rsp = NULL;
 		int rsp_len = 0;
 
-		ret = cmd->cmd(rbb, len, &rsp, &rsp_len);
+		ret = cmd->cmd(&ctx->ratp, rbb, len, &rsp, &rsp_len);
 		if (!ret)
 			ret = ratp_send(&ctx->ratp, rsp, rsp_len);
 
