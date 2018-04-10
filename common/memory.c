@@ -91,9 +91,10 @@ static int mem_malloc_resource(void)
 			(unsigned long)&__bss_start,
 			(unsigned long)&__bss_stop -
 			(unsigned long)&__bss_start);
-#ifdef STACK_BASE
-	request_sdram_region("stack", STACK_BASE, STACK_SIZE);
-#endif
+
+	if (STACK_SIZE)
+		request_sdram_region("stack", STACK_BASE, STACK_SIZE);
+
 	return 0;
 }
 coredevice_initcall(mem_malloc_resource);
