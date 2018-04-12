@@ -1540,6 +1540,30 @@ bool ratp_busy(struct ratp *ratp)
 }
 
 /**
+ * ratp_poll_sync() - Execute RATP state machine for a given period of time
+ * @ratp: The RATP link
+ *
+ * This function executes the RATP state machine for the amount of
+ * milliseconds specified.
+ *
+ * Return: 0 if successful, a negative error code otherwise.
+ */
+int ratp_poll_sync(struct ratp *ratp,
+		   int timeout_ms)
+{
+	uint64_t start;
+
+	start = get_time_ns();
+	while (1) {
+		if (ratp_poll(ratp) < 0)
+			return -1;
+		if (is_timeout(start, MSECOND * timeout_ms))
+			break;
+	}
+	return 0;
+}
+
+/**
  * ratp_poll() - Execute RATP state machine
  * @ratp: The RATP link
  *
