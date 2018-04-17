@@ -5,6 +5,7 @@
 #include <linux/sizes.h>
 
 #define PGDIR_SHIFT	20
+#define PGDIR_SIZE	(1UL << PGDIR_SHIFT)
 
 #define pgd_index(addr)		((addr) >> PGDIR_SHIFT)
 
@@ -39,7 +40,7 @@ create_sections(uint32_t *ttb, unsigned long addr,
 	unsigned long ttb_end   = ttb_start + pgd_index(size);
 	unsigned int i;
 
-	for (i = ttb_start; i < ttb_end; i++, addr += SZ_1M)
+	for (i = ttb_start; i < ttb_end; i++, addr += PGDIR_SIZE)
 		ttb[i] = addr | flags;
 }
 
