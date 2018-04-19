@@ -451,36 +451,20 @@ static int mmu_init(void)
 
 	if (get_cr() & CR_M) {
 		/*
-		 * Early MMU code has already enabled the MMU. We assume a
-		 * flat 1:1 section mapping in this case.
+		 * Early MMU code has already enabled the MMU. To
+		 * start form a clean slate we need to disable it
+		 * first.
 		 */
-		asm volatile ("mrc  p15,0,%0,c2,c0,0" : "=r"(ttb));
-
-		/* Clear unpredictable bits [13:0] */
-		ttb = (unsigned long *)((unsigned long)ttb & ~0x3fff);
-
-		if (!request_sdram_region("ttb", (unsigned long)ttb, SZ_16K))
-			/*
-			 * This can mean that:
-			 * - the early MMU code has put the ttb into a place
-			 *   which we don't have inside our available memory
-			 * - Somebody else has occupied the ttb region which means
-			 *   the ttb will get corrupted.
-			 */
-			pr_crit("Critical Error: Can't request SDRAM region for ttb at %p\n",
-					ttb);
-	} else {
-		ttb = xmemalign(0x10000, 0x4000);
+		mmu_disable();
 	}
 
+	ttb = xmemalign(0x10000, 0x4000);
 	pr_debug("ttb: 0x%p\n", ttb);
 
 	set_ttbr(ttb);
 	set_domain(DOMAIN_MANAGER);
 
 	create_flat_mapping(ttb);
-	__mmu_cache_flush();
-
 	vectors_init();
 
 	/*
@@ -488,11 +472,9 @@ static int mmu_init(void)
 	 * This is to speed up the generation of 2nd level page tables
 	 * below
 	 */
-	for_each_memory_bank(bank) {
+	for_each_memory_bank(bank)
 		create_sections(ttb, bank->start, bank->size,
 				PMD_SECT_DEF_CACHED);
-		__mmu_cache_flush();
-	}
 
 	__mmu_cache_on();
 
