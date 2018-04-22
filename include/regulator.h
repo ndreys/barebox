@@ -49,6 +49,8 @@ int regulator_disable(struct regulator *);
 int regulator_is_enabled_regmap(struct regulator_dev *);
 int regulator_enable_regmap(struct regulator_dev *);
 int regulator_disable_regmap(struct regulator_dev *);
+int regulator_set_voltage_sel_regmap(struct regulator_dev *, unsigned);
+int regulator_set_voltage(struct regulator *regulator, int min_uV, int max_uV);
 #else
 
 static inline struct regulator *regulator_get(struct device_d *dev, const char *id)
@@ -62,6 +64,12 @@ static inline int regulator_enable(struct regulator *r)
 }
 
 static inline int regulator_disable(struct regulator *r)
+{
+	return 0;
+}
+
+static inline int regulator_set_voltage(struct regulator *regulator,
+					int min_uV, int max_uV)
 {
 	return 0;
 }
