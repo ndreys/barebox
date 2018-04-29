@@ -176,6 +176,9 @@ struct rave_sp {
 
 	IPaddr_t ipaddr;
 	IPaddr_t netmask;
+
+	uint32_t usb_power;
+	uint32_t lcd_power;
 };
 
 struct rave_sp_version {
@@ -564,7 +567,7 @@ reset_framer:
 static int rave_sp_rdu1_cmd_translate(enum rave_sp_command command)
 {
 	if (command >= RAVE_SP_CMD_STATUS &&
-	    command <= RAVE_SP_CMD_CONTROL_EVENTS)
+	    command <= RAVE_SP_CMD_LCD_BOOT_ENABLE)
 		return command;
 
 	return -EINVAL;
@@ -657,6 +660,28 @@ static int rave_sp_get_status(struct rave_sp *sp)
 	sp->part_number_bootloader = devm_rave_sp_version(dev,
 						   &status.bootloader_version);
 	return 0;
+}
+
+static int rave_sp_usb_power_set(struct param_d *p, void *priv)
+{
+	struct rave_sp *sp = priv;
+	u8 cmd[] = {
+		[0] = RAVE_SP_CMD_USB_BOOT_ENABLE,
+		[1] = 0
+	};
+
+	return rave_sp_exec(sp, cmd, sizeof(cmd), NULL, 0);
+}
+
+static int rave_sp_lcd_power_set(struct param_d *p, void *priv)
+{
+	struct rave_sp *sp = priv;
+	u8 cmd[] = {
+		[0] = RAVE_SP_CMD_LCD_BOOT_ENABLE,
+		[1] = 0
+	};
+
+	return rave_sp_exec(sp, cmd, sizeof(cmd), NULL, 0);
 }
 
 static const struct rave_sp_checksum rave_sp_checksum_8b2c = {
@@ -752,6 +777,18 @@ static int rave_sp_add_params(struct rave_sp *sp)
 
 	p = dev_add_param_ip(dev, "netmask", NULL, rave_sp_req_ip_addr,
 			     &sp->netmask, sp);
+	if (IS_ERR(p))
+		return PTR_ERR(p);
+
+	p = dev_add_param_bool(&sp->dev, "usb_power",
+			       rave_sp_usb_power_set, NULL,
+			       &sp->usb_power, sp);
+	if (IS_ERR(p))
+		return PTR_ERR(p);
+
+	p = dev_add_param_bool(&sp->dev, "lcd_power",
+			       rave_sp_lcd_power_set, NULL,
+			       &sp->lcd_power, sp);
 	if (IS_ERR(p))
 		return PTR_ERR(p);
 
