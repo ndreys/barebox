@@ -473,11 +473,9 @@ static int __register_handler(struct imx_internal_bbu_handler *imx_handler)
 	return ret;
 }
 
-/*
- * Register an i.MX51 internal boot update handler for MMC/SD
- */
-int imx51_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
-		unsigned long flags)
+static int
+imx_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
+				      unsigned long flags, void *handler)
 {
 	struct imx_internal_bbu_handler *imx_handler;
 
@@ -485,9 +483,20 @@ int imx51_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
 	imx_handler->flash_header_offset = FLASH_HEADER_OFFSET_MMC;
 
 	imx_handler->flags = IMX_INTERNAL_FLAG_KEEP_DOSPART;
-	imx_handler->handler.handler = imx_bbu_internal_v1_update;
+	imx_handler->handler.handler = handler;
 
 	return __register_handler(imx_handler);
+}
+
+/*
+ * Register an i.MX51 internal boot update handler for MMC/SD
+ */
+int imx51_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
+		unsigned long flags)
+{
+
+	return imx_bbu_internal_mmc_register_handler(name, devicefile, flags,
+						  imx_bbu_internal_v1_update);
 }
 
 /*
@@ -496,15 +505,8 @@ int imx51_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
 int imx53_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
 		unsigned long flags)
 {
-	struct imx_internal_bbu_handler *imx_handler;
-
-	imx_handler = __init_handler(name, devicefile, flags);
-	imx_handler->flash_header_offset = FLASH_HEADER_OFFSET_MMC;
-
-	imx_handler->flags = IMX_INTERNAL_FLAG_KEEP_DOSPART;
-	imx_handler->handler.handler = imx_bbu_internal_v2_update;
-
-	return __register_handler(imx_handler);
+	return imx_bbu_internal_mmc_register_handler(name, devicefile, flags,
+						  imx_bbu_internal_v2_update);
 }
 
 /*
