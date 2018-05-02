@@ -635,8 +635,21 @@ static int rave_sp_get_status(struct rave_sp *sp)
 	int ret;
 
 	ret = rave_sp_exec(sp, cmd, sizeof(cmd), &status, sizeof(status));
-	if (ret)
-		return ret;
+	if (ret) {
+		cmd[0] = RAVE_SP_CMD_GET_FIRMWARE_VERSION;
+		ret = rave_sp_exec(sp, cmd, sizeof(cmd), &status.firmware_version,
+				   sizeof(status.firmware_version));
+		if (ret)
+			return ret;
+
+		cmd[0] = RAVE_SP_CMD_GET_BOOTLOADER_VERSION;
+		ret = rave_sp_exec(sp, cmd, sizeof(cmd), &status.bootloader_version,
+				   sizeof(status.bootloader_version));
+		if (ret)
+			return ret;
+
+		goto populate_version;
+	}
 
 	if (status.general_status & RAVE_SP_STATUS_GS_FIRMWARE_MODE)
 		mode = "Application";
@@ -645,6 +658,7 @@ static int rave_sp_get_status(struct rave_sp *sp)
 
 	dev_info(dev, "Device is in %s mode\n", mode);
 
+populate_version:
 	sp->part_number_firmware   = devm_rave_sp_version(dev,
 						   &status.firmware_version);
 	sp->part_number_bootloader = devm_rave_sp_version(dev,
