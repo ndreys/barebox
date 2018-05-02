@@ -83,6 +83,20 @@
 	};
 };
 
+&uart1 {
+	rave-sp {
+		compatible = "zii,rave-sp-rdu2";
+		current-speed = <1000000>;
+
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		watchdog {
+			compatible = "zii,rave-sp-watchdog";
+		};
+	};
+};
+
 &esdhc0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_esdhc0>;
