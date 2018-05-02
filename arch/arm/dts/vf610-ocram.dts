@@ -29,6 +29,13 @@
 			>;
 		};
 
+		pinctrl_uart1: uart1grp {
+			fsl,pins = <
+				VF610_PAD_PTB23__UART1_TX	0x21a2
+				VF610_PAD_PTB24__UART1_RX	0x21a1
+			>;
+		};
+
 		pinctrl_i2c0: i2c0grp {
 			fsl,pins = <
 				VF610_PAD_PTB14__I2C0_SCL	0x37ff
@@ -69,4 +76,24 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart0>;
 	status = "okay";
+};
+
+&uart1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart1>;
+	status = "okay";
+
+	rave-sp {
+		compatible = "zii,rave-sp-rdu2";
+		current-speed = <1000000>;
+
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		zii,initial-polling-window-ms = <500>;
+
+		watchdog {
+			compatible = "zii,rave-sp-watchdog";
+		};
+	};
 };
