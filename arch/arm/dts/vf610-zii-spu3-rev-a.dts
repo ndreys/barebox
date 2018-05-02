@@ -91,6 +91,8 @@
 		#address-cells = <1>;
 		#size-cells = <1>;
 
+		zii,initial-polling-window-ms = <500>;
+
 		watchdog {
 			compatible = "zii,rave-sp-watchdog";
 		};
