@@ -710,12 +710,19 @@ static int rave_sp_probe(struct device_d *dev)
 {
 	struct serdev_device *serdev = to_serdev_device(dev->parent);
 	struct rave_sp *sp;
-	u32 baud;
+	u32 baud, initial_polling_window;
 	int ret;
 
 	if (of_property_read_u32(dev->device_node, "current-speed", &baud)) {
 		dev_err(dev,
 			"'current-speed' is not specified in device node\n");
+		return -EINVAL;
+	}
+
+	if (of_property_read_u32(dev->device_node,
+				 "zii,initial-polling-window-ms",
+				 &initial_polling_window)) {
+		dev_err(dev, "'zii,initial-polling-window-ms' is missing\n");
 		return -EINVAL;
 	}
 
@@ -726,11 +733,12 @@ static int rave_sp_probe(struct device_d *dev)
 	serdev->receive_buf = rave_sp_receive_buf;
 	serdev->polling_interval = 500 * MSECOND;
 	/*
-	 * We have to set polling window to 200ms initially in order
-	 * to avoid timing out on get_status below when coming out of
-	 * power-cycle induced reset. It's adjusted right after
+	 * We have to set polling window to 'initial_polling_window'
+	 * initially in order to avoid timing out on get_status below
+	 * when coming out of power-cycle induced reset. It's adjusted
+	 * right after
 	 */
-	serdev->polling_window = 200 * MSECOND;
+	serdev->polling_window = initial_polling_window * MSECOND;
 
 	sp->variant = of_device_get_match_data(dev);
 	if (!sp->variant)
