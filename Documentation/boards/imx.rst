@@ -38,11 +38,18 @@ SD card::
   # otherwise:
   cat barebox-flash-image > /dev/sdd
 
+NOTE: Commands above will not work on i.MX8
+
 The above will overwrite the MBR (and consequently the partition table)
 on the destination SD card. To preserve the MBR while writing the rest
 of the image to the card, use::
 
   dd if=images/barebox-freescale-imx51-babbage.img of=/dev/sdd bs=1024 skip=1 seek=1
+
+NOTE: MaskROM on i.MX8 expects image to start at +33KiB mark, so the
+following command has to be used instead:
+
+  dd if=images/barebox-nxp-imx8mq-evk.img of=/dev/sdd bs=1024 skip=1 seek=33
 
 The images can also always be started second stage::
 
@@ -59,7 +66,8 @@ options in this file are:
 Header:
 
 +----------------+--------------------------------------------------------------+
-| soc <soctype>  | soctype can be one of imx35, imx51, imx53, imx6, imx7, vf610 |
+| soc <soctype>  |soctype can be one of imx35, imx51, imx53, imx6, imx7, vf610, |
+|                |                             imx8                             |
 +----------------+--------------------------------------------------------------+
 | loadaddr <adr> |     The address the binary is uploaded to                    |
 +----------------+--------------------------------------------------------------+

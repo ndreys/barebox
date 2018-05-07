@@ -467,3 +467,25 @@ quiet_cmd_b64dec = B64DEC  $@
 
 %: %.base64
 	$(call cmd,b64dec)
+
+#
+# Generate an assembly file to wrap DDR PHY firmware for i.MX8
+#
+extra-y	+= $(patsubst %.ddr-phy-fw.o,%.ddr-phy-fw.S,$(pbl-y))
+
+quiet_cmd_ddr_phy_fw_S = DDR-PHY-FW.S    $@
+cmd_ddr_phy_fw_S =							\
+(									\
+	echo '\#include <asm-generic/barebox.lds.h>';			\
+	echo '.section .ddr-phy-fw.rodata.$(subst -,_,$(*F)),"a"';	\
+	echo '.balign STRUCT_ALIGNMENT';				\
+	echo '.global __ddr_phy_fw_$(subst -,_,$(*F))_start';		\
+	echo '__ddr_phy_fw_$(subst -,_,$(*F))_start:';			\
+	echo '.incbin "$<" ';	   					\
+	echo '__ddr_phy_fw_$(subst -,_,$(*F))_end:';			\
+	echo '.global __ddr_phy_fw_$(subst -,_,$(*F))_end';		\
+	echo '.balign STRUCT_ALIGNMENT';   				\
+) > $@
+
+$(obj)/%.ddr-phy-fw.S: $(src)/%.ddr-phy-fw FORCE
+	$(call if_changed,ddr_phy_fw_S)
