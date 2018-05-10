@@ -25,13 +25,27 @@ static inline uint32_t cyc2ns(struct clocksource *cs, uint64_t cycles)
 
 int init_clock(struct clocksource *);
 
+#ifndef __PBL__
 uint64_t get_time_ns(void);
+#else
+static inline uint64_t get_time_ns(void)
+{
+	return 0;
+}
+#endif
 
 void clocks_calc_mult_shift(uint32_t *mult, uint32_t *shift, uint32_t from, uint32_t to, uint32_t maxsec);
 
 uint32_t clocksource_hz2mult(uint32_t hz, uint32_t shift_constant);
 
+#ifndef __PBL__
 int is_timeout(uint64_t start_ns, uint64_t time_offset_ns);
+#else
+static inline int is_timeout(uint64_t start_ns, uint64_t time_offset_ns)
+{
+	return 0;
+}
+#endif
 int is_timeout_non_interruptible(uint64_t start_ns, uint64_t time_offset_ns);
 
 void ndelay(unsigned long nsecs);
