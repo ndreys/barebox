@@ -1,5 +1,7 @@
 #ifndef __IMX_CCM_H__
 
+#include <linux/bitfield.h>
+
 /* 0 <= n <= 190 */
 #define CCM_CCGRn_SET(n)	(0x4004 + 16 * (n))
 #define CCM_CCGRn_CLR(n)	(0x4008 + 16 * (n))
@@ -9,6 +11,8 @@
 
 #define CCM_TARGET_ROOTn_MUX(x)		((x) << 24)
 #define CCM_TARGET_ROOTn_ENABLE		BIT(28)
+#define CCM_TARGET_ROOTn_PRE_PODF(x)	FIELD_PREP(GENMASK(18, 16), x)
+#define CCM_TARGET_ROOTn_PRE_DIV(x)	CCM_TARGET_ROOTn_PRE_PODF((x) - 1)
 
 
 #define CCM_CCGR_SETTINGn(n, s)  ((s) << ((n) * 4))
