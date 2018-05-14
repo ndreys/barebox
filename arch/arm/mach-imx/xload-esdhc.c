@@ -176,7 +176,7 @@ esdhc_send_cmd(struct esdhc *esdhc, struct mci_cmd *cmd, struct mci_data *data)
 	return 0;
 }
 
-static int esdhc_read_blocks(struct esdhc *esdhc, void *dst, size_t len)
+static int esdhc_read_blocks(struct esdhc *esdhc, u32 offset, void *dst, size_t len)
 {
 	struct mci_cmd cmd;
 	struct mci_data data;
@@ -193,7 +193,7 @@ static int esdhc_read_blocks(struct esdhc *esdhc, void *dst, size_t len)
 	writel(val, esdhc->regs + SDHCI_CLOCK_CONTROL__TIMEOUT_CONTROL__SOFTWARE_RESET);
 
 	cmd.cmdidx = MMC_CMD_READ_MULTIPLE_BLOCK;
-	cmd.cmdarg = 0;
+	cmd.cmdarg = offset;
 	cmd.resp_type = MMC_RSP_R1;
 
 	data.dest = dst;
@@ -216,9 +216,9 @@ static int esdhc_read_blocks(struct esdhc *esdhc, void *dst, size_t len)
 	return 0;
 }
 
-static int esdhc_start_image(struct esdhc *esdhc)
+static int esdhc_start_image(struct esdhc *esdhc, ptrdiff_t address, u32 offset)
 {
-	void *buf = (void *)0x10000000;
+	void *buf = (void *)address;
 	u32 *ivt = buf + SZ_1K;
 	int ret, len;
 	void __noreturn (*bb)(void);
@@ -227,7 +227,7 @@ static int esdhc_start_image(struct esdhc *esdhc)
 	len = imx_image_size();
 	len = ALIGN(len, SECTOR_SIZE);
 
-	ret = esdhc_read_blocks(esdhc, buf, 3 * SECTOR_SIZE);
+	ret = esdhc_read_blocks(esdhc, offset, buf, 3 * SECTOR_SIZE);
 	if (ret)
 		return ret;
 	if (*(u32 *)(ivt) != 0x402000d1) {
@@ -238,7 +238,7 @@ static int esdhc_start_image(struct esdhc *esdhc)
 
 	pr_debug("Check ok, loading image\n");
 
-	ret = esdhc_read_blocks(esdhc, buf, len);
+	ret = esdhc_read_blocks(esdhc, offset, buf, len);
 	if (ret) {
 		pr_err("Loading image failed with %d\n", ret);
 		return ret;
@@ -288,5 +288,5 @@ int imx6_esdhc_start_image(int instance)
 
 	esdhc.is_mx6 = 1;
 
-	return esdhc_start_image(&esdhc);
+	return esdhc_start_image(&esdhc, 0x10000000, 0);
 }
