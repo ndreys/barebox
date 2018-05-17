@@ -9,6 +9,8 @@
 /* 0 <= n <= 120 */
 #define CCM_TARGET_ROOTn(n)	(0x8000 + 128 * (n))
 
+#define CCM_TARGET_ROOTn_SET(n)	(0x8004 + 128 * (n))
+
 #define CCM_TARGET_ROOTn_MUX(x)		((x) << 24)
 #define CCM_TARGET_ROOTn_ENABLE		BIT(28)
 #define CCM_TARGET_ROOTn_PRE_PODF(x)	FIELD_PREP(GENMASK(18, 16), x)
