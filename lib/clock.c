@@ -50,9 +50,11 @@ EXPORT_SYMBOL(udelay);
 
 void mdelay(unsigned long msecs)
 {
-	uint64_t start = get_time_ns();
-
-	while(!is_timeout(start, msecs * MSECOND));
+	/*
+	 * Parens around division below are needed to pervent ARM/EABI
+	 * toolchain from emiiting a call to __aeabi_uldivmod here
+	 */
+	udelay(msecs * (MSECOND / USECOND));
 }
 EXPORT_SYMBOL(mdelay);
 
