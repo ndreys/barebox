@@ -86,9 +86,7 @@ static inline void udelay(unsigned long usecs)
 
 static inline void mdelay(unsigned long msecs)
 {
-	uint64_t start = get_time_ns();
-
-	while(!is_timeout(start, msecs * MSECOND));
+	udelay(msecs * MSECOND / USECOND);
 }
 
 static inline void mdelay_non_interruptible(unsigned long msecs)
