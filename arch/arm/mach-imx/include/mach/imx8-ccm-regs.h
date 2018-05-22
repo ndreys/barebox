@@ -9,6 +9,9 @@
  * Taken from "Table 5-1. Clock Root Table" from i.MX8M Quad
  * Applications Processor Reference Manual
  */
+
+#define DRAM_SEL_CLK_ROOT	48 /* Undocumented */
+
 #define DRAM_ALT_CLK_ROOT	64
 #define DRAM_ALT_CLK_ROOT__SYSTEM_PLL1_DIV8 CCM_TARGET_ROOTn_MUX(0b010)
 #define DRAM_ALT_CLK_ROOT__SYSTEM_PLL1_DIV2 CCM_TARGET_ROOTn_MUX(0b101)
@@ -19,5 +22,13 @@
 
 #define UART1_CLK_ROOT		94
 #define UART1_CLK_ROOT__25M_REF_CLK CCM_TARGET_ROOTn_MUX(0b000)
+
+
+#define CCM_ANALOG_DRAM_PLL_CFG0	0x0060
+#define CCM_ANALOG_PLL_PD		BIT(7)
+#define CCM_ANALOG_PLL_BYPASS1		BIT(5)
+#define CCM_ANALOG_PLL_BYPASS2		BIT(4)
+#define CCM_ANALOG_PLL_CLKE		BIT(9)
+#define CCM_ANALOG_PLL_LOCK		BIT(31)
 
 #endif
