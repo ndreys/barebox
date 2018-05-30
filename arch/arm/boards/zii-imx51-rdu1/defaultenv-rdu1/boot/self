@@ -1,0 +1,3 @@
+#!/bin/sh
+
+global.bootm.image=/mnt/tftp/barebox-zii-imx51-rdu1.img

@@ -2,4 +2,4 @@
 
 global.linux.bootargs.base="nointrd earlyprintk"
 global.bootm.image=/mnt/tftp/zImage.rdu1
-global.bootm.oftree=/mnt/tftp/imx51-zii-rdu1.dtb
+global.bootm.oftree=/mnt/tftp/vf610-zii-${global.hostname}.dtb

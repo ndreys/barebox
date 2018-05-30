@@ -1,0 +1,5 @@
+#!/bin/sh
+
+sp.usb_power=1
+sp.lcd_power=1
+usb

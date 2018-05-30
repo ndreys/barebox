@@ -1,5 +1,4 @@
 #!/bin/sh
 
 global.bootm.image=/mnt/tftp/zImage.rdu1
-global.bootm.oftree=/mnt/tftp/imx6qp-zii-rdu2.dtb
-
+global.bootm.oftree=/mnt/tftp/imx7d-zii-rpu2.dtb

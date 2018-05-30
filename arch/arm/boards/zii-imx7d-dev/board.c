@@ -44,6 +44,9 @@ static int zii_imx7d_rpu2_coredevices_init(void)
 
 	imx7_bbu_internal_mmcboot_register_handler("eMMC", "/dev/mmc2", 0);
 
+
+	defaultenv_append_directory(defaultenv_zii_imx7d_rpu2);
+
 	return 0;
 }
 coredevice_initcall(zii_imx7d_rpu2_coredevices_init);
