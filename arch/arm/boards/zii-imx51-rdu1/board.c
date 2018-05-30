@@ -57,6 +57,8 @@ static int zii_rdu1_init(void)
 		BBU_HANDLER_FLAG_DEFAULT |
 		IMX_BBU_FLAG_PARTITION_STARTS_AT_HEADER);
 
+	defaultenv_append_directory(defaultenv_zii_imx51_rdu1);
+
 	return 0;
 }
 coredevice_initcall(zii_rdu1_init);
