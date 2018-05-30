@@ -34,6 +34,9 @@
 #include <libfile.h>
 #include <param.h>
 
+#include <environment.h>
+#include <envfs.h>
+
 static void rdu1_power_init(struct mc13xxx *mc13xxx)
 {
 	u32 val;
@@ -153,6 +156,8 @@ static int rdu1_init(void)
 		"/dev/mmc0", 0);
 	imx51_bbu_internal_spi_register_handler("spiflash",
 		"/dev/dataflash0", BBU_HANDLER_FLAG_DEFAULT);
+
+	defaultenv_append_directory(defaultenv_zii_imx51_rdu1);
 
 	return 0;
 }
