@@ -21,6 +21,8 @@
 #include <libfile.h>
 #include <mach/imx5.h>
 
+#include <envfs.h>
+
 #include "pn-fixup.h"
 
 static int zii_rdu1_init(void)
@@ -37,6 +39,8 @@ static int zii_rdu1_init(void)
 		"/dev/dataflash0.barebox",
 		BBU_HANDLER_FLAG_DEFAULT |
 		IMX_BBU_FLAG_PARTITION_STARTS_AT_HEADER);
+
+	defaultenv_append_directory(defaultenv_zii_imx51_rdu1);
 
 	return 0;
 }
