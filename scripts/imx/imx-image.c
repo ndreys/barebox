@@ -216,9 +216,6 @@ static int add_header_v1(struct config_data *data, void *buf)
 	uint32_t loadaddr = data->image_load_addr;
 	uint32_t imagesize = data->load_size;
 
-	if (add_barebox_header)
-		memcpy(buf, bb_header, sizeof(bb_header));
-
 	buf += offset;
 	hdr = buf;
 
@@ -291,9 +288,6 @@ static int add_header_v2(const struct config_data *data, void *buf)
 	int offset = data->image_dcd_offset;
 	uint32_t loadaddr = data->image_load_addr;
 	uint32_t imagesize = data->load_size;
-
-	if (add_barebox_header)
-		memcpy(buf, bb_header, sizeof(bb_header));
 
 	buf += offset;
 	hdr = buf;
@@ -824,7 +818,15 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	ret = xwrite(outfd, buf, HEADER_LEN);
+	ret = xwrite(outfd, add_barebox_header ? bb_header : buf,
+		     sizeof(bb_header));
+	if (ret < 0) {
+		perror("write");
+		exit(1);
+	}
+
+	ret = xwrite(outfd, buf + sizeof(bb_header),
+		     HEADER_LEN - sizeof(bb_header));
 	if (ret < 0) {
 		perror("write");
 		exit(1);
