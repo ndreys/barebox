@@ -1,0 +1,8 @@
+#!/bin/sh
+
+ip=static
+ipaddr=192.168.53.111
+netmask=255.255.255.0
+serverip=192.168.53.7
+
+exit 0

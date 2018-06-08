@@ -68,6 +68,8 @@ static int nxp_imx8mq_evk_init(void)
 	else
 		of_device_enable_path("/chosen/environment-sd");
 
+	defaultenv_append_directory(defaultenv_evk);
+
 	phy_register_fixup_for_uid(PHY_ID_AR8031, AR_PHY_ID_MASK,
 				   ar8031_phy_fixup);
 	return 0;
