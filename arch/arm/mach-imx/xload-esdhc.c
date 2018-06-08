@@ -219,7 +219,8 @@ static int esdhc_read_blocks(struct esdhc *esdhc, void *dst, size_t len)
 }
 
 static int
-esdhc_start_image(struct esdhc *esdhc, ptrdiff_t address, u32 offset)
+esdhc_start_image(struct esdhc *esdhc, ptrdiff_t address, u32 offset,
+		  u32 (*opcode_b)(u32))
 {
 	void *buf = (void *)address;
 	u32 *ivt = buf + offset + SZ_1K;
@@ -253,6 +254,9 @@ esdhc_start_image(struct esdhc *esdhc, ptrdiff_t address, u32 offset)
 	ofs = offset + *(ivt + 1) - *(ivt + 8);
 
 	bb = buf + ofs;
+
+	if (opcode_b)
+		*(u32 *)buf = opcode_b(ofs);
 
 	bb();
 }
@@ -292,7 +296,12 @@ int imx6_esdhc_start_image(int instance)
 
 	esdhc.is_mx6 = 1;
 
-	return esdhc_start_image(&esdhc, 0x10000000, 0);
+	return esdhc_start_image(&esdhc, 0x10000000, 0, NULL);
+}
+
+static u32 aarch64_opcode_b(u32 to)
+{
+	return 0x14000000 | (to / 4);
 }
 
 /**
@@ -324,5 +333,8 @@ int imx8_esdhc_start_image(int instance)
 
 	esdhc.is_mx6 = 1;
 
-	return esdhc_start_image(&esdhc, MX8MQ_ATF_BL33_BASE_ADDR, SZ_32K);
+	return esdhc_start_image(&esdhc,
+				 MX8MQ_ATF_BL33_BASE_ADDR,
+				 SZ_32K,
+				 aarch64_opcode_b);
 }
