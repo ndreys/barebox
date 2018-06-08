@@ -22,6 +22,8 @@
 #include <asm/memory.h>
 #include <linux/sizes.h>
 
+#include <envfs.h>
+
 static int imx8mq_evk_mem_init(void)
 {
 	arm_add_mem_device("ram0", 0x40000000, SZ_2G);
@@ -38,6 +40,8 @@ static int nxp_imx8mq_evk_init(void)
 		return 0;
 
 	barebox_set_hostname("imx8mq-evk");
+
+	defaultenv_append_directory(defaultenv_evk);
 
 	return 0;
 }
