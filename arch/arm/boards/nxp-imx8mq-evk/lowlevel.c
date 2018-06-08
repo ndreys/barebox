@@ -23,6 +23,7 @@
 #include <asm/cache.h>
 #include <asm/sections.h>
 #include <asm/mmu.h>
+#include <mach/atf.h>
 
 #include "ddr.h"
 
@@ -74,6 +75,8 @@ ENTRY_FUNCTION(start_nxp_imx8mq_evk, r0, r1, r2)
 
 	if (get_pc() < MX8MQ_DDR_CSD1_BASE_ADDR)
 		nxp_imx8mq_evk_sram_setup();
+
+	imx8mq_atf_load_bl31(imx_imx8m_bl31_bin);
 
 	barebox_arm_entry(MX8MQ_DDR_CSD1_BASE_ADDR,
 			  SZ_2G + SZ_1G, __dtb_imx8mq_evk_start);
