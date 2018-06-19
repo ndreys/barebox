@@ -61,20 +61,20 @@ static int imx_bbu_write_device(struct imx_internal_bbu_handler *imx_handler,
 		return fd;
 
 	if (imx_handler->flags & IMX_INTERNAL_FLAG_ERASE) {
-		debug("%s: unprotecting %s from 0 to 0x%08x\n", __func__,
+		pr_debug("%s: unprotecting %s from 0 to 0x%08x\n", __func__,
 				devicefile, image_len);
 		ret = protect(fd, image_len, 0, 0);
 		if (ret && ret != -ENOSYS) {
-			printf("unprotecting %s failed with %s\n", devicefile,
+			pr_err("unprotecting %s failed with %s\n", devicefile,
 					strerror(-ret));
 			goto err_close;
 		}
 
-		debug("%s: erasing %s from 0 to 0x%08x\n", __func__,
+		pr_debug("%s: erasing %s from 0 to 0x%08x\n", __func__,
 				devicefile, image_len);
 		ret = erase(fd, image_len, 0);
 		if (ret) {
-			printf("erasing %s failed with %s\n", devicefile,
+			pr_err("erasing %s failed with %s\n", devicefile,
 					strerror(-ret));
 			goto err_close;
 		}
@@ -83,7 +83,7 @@ static int imx_bbu_write_device(struct imx_internal_bbu_handler *imx_handler,
 	if (imx_handler->flags & IMX_INTERNAL_FLAG_KEEP_DOSPART) {
 		void *mbr = xzalloc(512);
 
-		debug("%s: reading DOS partition table in order to keep it\n", __func__);
+		pr_debug("%s: reading DOS partition table in order to keep it\n", __func__);
 
 		ret = read(fd, mbr, 512);
 		if (ret < 0) {
@@ -114,11 +114,11 @@ static int imx_bbu_write_device(struct imx_internal_bbu_handler *imx_handler,
 		goto err_close;
 
 	if (imx_handler->flags & IMX_INTERNAL_FLAG_ERASE) {
-		debug("%s: protecting %s from 0 to 0x%08x\n", __func__,
+		pr_debug("%s: protecting %s from 0 to 0x%08x\n", __func__,
 				devicefile, image_len);
 		ret = protect(fd, image_len, 0, 1);
 		if (ret && ret != -ENOSYS) {
-			printf("protecting %s failed with %s\n", devicefile,
+			pr_err("protecting %s failed with %s\n", devicefile,
 					strerror(-ret));
 		}
 	}
@@ -166,7 +166,7 @@ static int imx_bbu_internal_v1_update(struct bbu_handler *handler, struct bbu_da
 	if (ret)
 		return ret;
 
-	printf("updating to %s\n", data->devicefile);
+	pr_info("updating to %s\n", data->devicefile);
 
 	ret = imx_bbu_write_device(imx_handler, data->devicefile, data, data->image, data->len);
 
@@ -257,7 +257,7 @@ static int imx_bbu_internal_v2_write_nand_dbbt(struct imx_internal_bbu_handler *
 
 		if (ret) {
 			if (!offset) {
-				printf("1st block is bad. This is not supported\n");
+				pr_err("1st block is bad. This is not supported\n");
 				ret = -EINVAL;
 				goto out;
 			}
@@ -266,7 +266,7 @@ static int imx_bbu_internal_v2_write_nand_dbbt(struct imx_internal_bbu_handler *
 			*num_bb += 1;
 			if (*num_bb == 425) {
 				/* Maximum number of bad blocks the ROM supports */
-				printf("maximum number of bad blocks reached\n");
+				pr_err("maximum number of bad blocks reached\n");
 				ret = -ENOSPC;
 				goto out;
 			}
@@ -281,7 +281,7 @@ static int imx_bbu_internal_v2_write_nand_dbbt(struct imx_internal_bbu_handler *
 		block++;
 
 		if (size_available < 0) {
-			printf("device is too small");
+			pr_err("device is too small");
 			ret = -ENOSPC;
 			goto out;
 		}
@@ -292,7 +292,7 @@ static int imx_bbu_internal_v2_write_nand_dbbt(struct imx_internal_bbu_handler *
 			data->len + pre_image_size + *num_bb * blocksize);
 
 	if (data->len + pre_image_size + *num_bb * blocksize > imx_handler->device_size) {
-		printf("needed space (0x%08zx) exceeds partition space (0x%08zx)\n",
+		pr_err("needed space (0x%08zx) exceeds partition space (0x%08zx)\n",
 				data->len + pre_image_size + *num_bb * blocksize,
 				imx_handler->device_size);
 		ret = -ENOSPC;
@@ -320,7 +320,7 @@ static int imx_bbu_internal_v2_write_nand_dbbt(struct imx_internal_bbu_handler *
 			continue;
 		}
 
-		debug("writing %d bytes at 0x%08llx\n", now, offset);
+		pr_debug("writing %d bytes at 0x%08llx\n", now, offset);
 
 		ret = erase(fd, blocksize, offset);
 		if (ret)
@@ -367,7 +367,7 @@ static int imx_bbu_internal_v2_update(struct bbu_handler *handler, struct bbu_da
 	barker = data->image + imx_handler->flash_header_offset;
 
 	if (*barker != IVT_BARKER) {
-		printf("Board does not provide DCD data and this image is no imximage\n");
+		pr_err("Board does not provide DCD data and this image is no imximage\n");
 		return -EINVAL;
 	}
 
@@ -394,7 +394,7 @@ static int imx_bbu_internal_v2_mmcboot_update(struct bbu_handler *handler,
 	barker = data->image + imx_handler->flash_header_offset;
 
 	if (*barker != IVT_BARKER) {
-		printf("Board does not provide DCD data and this image is no imximage\n");
+		pr_err("Board does not provide DCD data and this image is no imximage\n");
 		return -EINVAL;
 	}
 
@@ -473,11 +473,9 @@ static int __register_handler(struct imx_internal_bbu_handler *imx_handler)
 	return ret;
 }
 
-/*
- * Register an i.MX51 internal boot update handler for MMC/SD
- */
-int imx51_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
-		unsigned long flags)
+static int
+imx_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
+				      unsigned long flags, void *handler)
 {
 	struct imx_internal_bbu_handler *imx_handler;
 
@@ -485,7 +483,7 @@ int imx51_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
 	imx_handler->flash_header_offset = FLASH_HEADER_OFFSET_MMC;
 
 	imx_handler->flags = IMX_INTERNAL_FLAG_KEEP_DOSPART;
-	imx_handler->handler.handler = imx_bbu_internal_v1_update;
+	imx_handler->handler.handler = handler;
 
 	return __register_handler(imx_handler);
 }
@@ -505,20 +503,24 @@ int imx51_bbu_internal_spi_i2c_register_handler(const char *name,
 }
 
 /*
+ * Register an i.MX51 internal boot update handler for MMC/SD
+ */
+int imx51_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
+		unsigned long flags)
+{
+
+	return imx_bbu_internal_mmc_register_handler(name, devicefile, flags,
+						  imx_bbu_internal_v1_update);
+}
+
+/*
  * Register an i.MX53 internal boot update handler for MMC/SD
  */
 int imx53_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
 		unsigned long flags)
 {
-	struct imx_internal_bbu_handler *imx_handler;
-
-	imx_handler = __init_handler(name, devicefile, flags);
-	imx_handler->flash_header_offset = FLASH_HEADER_OFFSET_MMC;
-
-	imx_handler->flags = IMX_INTERNAL_FLAG_KEEP_DOSPART;
-	imx_handler->handler.handler = imx_bbu_internal_v2_update;
-
-	return __register_handler(imx_handler);
+	return imx_bbu_internal_mmc_register_handler(name, devicefile, flags,
+						  imx_bbu_internal_v2_update);
 }
 
 /*
@@ -549,7 +551,7 @@ int imx53_bbu_internal_nand_register_handler(const char *name,
 	struct imx_internal_bbu_handler *imx_handler;
 
 	imx_handler = __init_handler(name, NULL, flags);
-	imx_handler->flash_header_offset = 0x400;
+	imx_handler->flash_header_offset = FLASH_HEADER_OFFSET_MMC;
 
 	imx_handler->handler.handler = imx_bbu_internal_v2_update;
 	imx_handler->flags = IMX_INTERNAL_FLAG_NAND;
@@ -563,18 +565,15 @@ int imx53_bbu_internal_nand_register_handler(const char *name,
  * Register an i.MX6 internal boot update handler for MMC/SD
  */
 int imx6_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
-		unsigned long flags)
-{
-	struct imx_internal_bbu_handler *imx_handler;
+					   unsigned long flags)
+	__alias(imx53_bbu_internal_mmc_register_handler);
 
-	imx_handler = __init_handler(name, devicefile, flags);
-	imx_handler->flash_header_offset = FLASH_HEADER_OFFSET_MMC;
-
-	imx_handler->flags = IMX_INTERNAL_FLAG_KEEP_DOSPART;
-	imx_handler->handler.handler = imx_bbu_internal_v2_update;
-
-	return __register_handler(imx_handler);
-}
+/*
+ * Register an VF610 internal boot update handler for MMC/SD
+ */
+int vf610_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
+					    unsigned long flags)
+	__alias(imx6_bbu_internal_mmc_register_handler);
 
 /*
  * Register a handler that writes to the non-active boot partition of an mmc
@@ -603,19 +602,10 @@ int imx6_bbu_internal_mmcboot_register_handler(const char *name, char *devicefil
  * EEPROMs / flashes. Nearly the same as MMC/SD, but we do not need to
  * keep a partition table. We have to erase the device beforehand though.
  */
-int imx6_bbu_internal_spi_i2c_register_handler(const char *name, char *devicefile,
-		unsigned long flags)
-{
-	struct imx_internal_bbu_handler *imx_handler;
-
-	imx_handler = __init_handler(name, devicefile, flags);
-	imx_handler->flash_header_offset = FLASH_HEADER_OFFSET_MMC;
-
-	imx_handler->flags = IMX_INTERNAL_FLAG_ERASE;
-	imx_handler->handler.handler = imx_bbu_internal_v2_update;
-
-	return __register_handler(imx_handler);
-}
+int imx6_bbu_internal_spi_i2c_register_handler(const char *name,
+					       char *devicefile,
+					       unsigned long flags)
+	__alias(imx53_bbu_internal_spi_i2c_register_handler);
 
 int imx_bbu_external_nor_register_handler(const char *name, char *devicefile,
 		unsigned long flags)
