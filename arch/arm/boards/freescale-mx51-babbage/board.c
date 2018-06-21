@@ -150,6 +150,81 @@ static void babbage_power_init(struct mc13xxx *mc13xxx)
 	clock_notifier_call_chain();
 }
 
+#define USBH1_HUB_RST	IMX_GPIO_NR(1, 7)
+#define USBH1_STP	IMX_GPIO_NR(1, 27)
+#define USB_CLK_EN_B	IMX_GPIO_NR(2, 1)
+#define USB_PHY_RESET	IMX_GPIO_NR(2, 5)
+
+static const struct gpio imx51_babbage_usbh1_gpios[] = {
+	{
+		.gpio  = USBH1_HUB_RST,
+		.flags = GPIOF_OUT_INIT_LOW,
+		.label = "usbh1-hub-rst",
+	},
+	{
+		.gpio  = USBH1_STP,
+		.flags = GPIOF_OUT_INIT_LOW,
+		.label = "usbh1-stp",
+	},
+	{
+		.gpio  = USB_CLK_EN_B,
+		.flags = GPIOF_OUT_INIT_HIGH,
+		.label = "usb-clk-en-b",
+	},
+	{
+		.gpio  = USB_PHY_RESET,
+		.flags = GPIOF_OUT_INIT_LOW,
+		.label = "usb-clk-en-b",
+	},
+
+};
+
+static const iomux_v3_cfg_t imx51_babbage_usbh1_pads[] = {
+	MX51_PAD_USBH1_STP__GPIO1_27,
+	MX51_PAD_GPIO1_7__GPIO1_7,
+	MX51_PAD_EIM_D17__GPIO2_1,
+	MX51_PAD_EIM_D21__GPIO2_5, /* PHY reset */
+};
+
+static int imx51_babbage_reset_usbh1(void)
+{
+	int ret;
+	void __iomem *iomuxbase = IOMEM(MX51_IOMUXC_BASE_ADDR);
+
+	if (!of_machine_is_compatible("fsl,imx51-babbage"))
+		return 0;
+
+	ret = mxc_iomux_v3_setup_multiple_pads(
+		ARRAY_AND_SIZE(imx51_babbage_usbh1_pads));
+	if (WARN_ON(ret))
+		return ret;
+
+	ret = gpio_request_array(ARRAY_AND_SIZE(imx51_babbage_usbh1_gpios));
+	if (WARN_ON(ret))
+		return ret;
+
+	mdelay(10);
+	gpio_set_value(USBH1_STP, 1);
+
+	/* De-assert USB PHY RESETB */
+	gpio_set_value(USB_PHY_RESET, 1);
+
+	imx_setup_pad(iomuxbase, MX51_PAD_USBH1_STP__USBH1_STP);
+
+	/* Drive USB_CLK_EN_B line low */
+	gpio_set_value(USB_CLK_EN_B, 0);
+
+	/* Reset USB hub */
+	gpio_direction_output(USBH1_HUB_RST, 0);
+	mdelay(2);
+	gpio_set_value(USBH1_HUB_RST, 1);
+
+	gpio_free_array(ARRAY_AND_SIZE(imx51_babbage_usbh1_gpios));
+
+	return 0;
+}
+postcore_initcall(imx51_babbage_reset_usbh1);
+
 static int imx51_babbage_init(void)
 {
 	if (!of_machine_is_compatible("fsl,imx51-babbage"))
