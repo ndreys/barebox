@@ -24,6 +24,11 @@
 			device-path = &spinor, "partname:barebox-environment";
 		};
 	};
+
+	device-info {
+		nvmem-cells = <&dds_part_number>;
+		nvmem-cell-names = "dds-part-number";
+	};
 };
 
 &ecspi1 {
@@ -67,6 +72,11 @@
 			#address-cells = <1>;
 			#size-cells = <1>;
 			zii,eeprom-name = "dds-eeprom";
+
+			dds_part_number: dds-part-number@21 {
+				reg = <0x21 15>;
+				read-only;
+			};
 		};
 
 		eeprom@a4 {
