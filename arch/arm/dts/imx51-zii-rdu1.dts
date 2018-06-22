@@ -81,6 +81,11 @@
 			};
 		};
 
+		eeprom@ae {
+			compatible = "zii,rave-sp-eeprom";
+			reg = <0xae 0x200>;
+		};
+
 		backlight {
 			compatible = "zii,rave-sp-backlight";
 		};
