@@ -25,6 +25,7 @@
 #include <linux/crc8.h>
 #include <linux/sizes.h>
 #include <linux/nvmem-consumer.h>
+#include <mach/zii/pn-fixup.h>
 
 #include <envfs.h>
 
@@ -271,3 +272,36 @@ static int zii_rdu1_disable_sp_node(void)
 }
 late_initcall(zii_rdu1_disable_sp_node);
 
+static void zii_rdu1_sp_switch_eeprom(const struct zii_pn_fixup *fixup)
+{
+	struct device_node *np, *root;
+	struct cdev *cdev;
+
+	root = of_get_root_node();
+	np   = of_find_node_by_name(root, "eeprom@ae");
+	if (WARN_ON(!np))
+		return;
+
+	cdev = cdev_by_device_node(np);
+	if (!cdev) {
+		pr_err("Couldn't find switch eeprom\n");
+		return;
+	}
+
+	WARN_ON(devfs_create_link(cdev, "switch-eeprom"));
+}
+
+static const struct zii_pn_fixup zii_rdu1_dds_fixups[] = {
+	{ "05-0004-02-E3", zii_rdu1_sp_switch_eeprom }
+};
+
+static int zii_rdu1_process_fixups(void)
+{
+	if (!of_machine_is_compatible("zii,imx51-rdu1"))
+		return 0;
+
+	zii_process_dds_fixups(zii_rdu1_dds_fixups);
+
+	return 0;
+}
+postmmu_initcall(zii_rdu1_process_fixups);
