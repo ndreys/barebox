@@ -29,6 +29,7 @@
 #include <ioctl.h>
 #include <environment.h>
 #include <mach/bbu.h>
+#include <mach/generic.h>
 
 #define FLASH_HEADER_OFFSET_MMC		0x400
 
@@ -324,6 +325,18 @@ out:
 	return ret;
 }
 
+static enum filetype imx_bbu_expected_filetype(void)
+{
+	if (cpu_is_mx8mq() ||
+	    cpu_is_mx7()   ||
+	    cpu_is_mx6()   ||
+	    cpu_is_vf610() ||
+	    cpu_is_mx53())
+		return filetype_imx_image_v2;
+
+	return filetype_unknown;
+}
+
 static int imx_bbu_update(struct bbu_handler *handler, struct bbu_data *data)
 {
 	struct imx_internal_bbu_handler *imx_handler =
@@ -335,11 +348,17 @@ static int imx_bbu_update(struct bbu_handler *handler, struct bbu_data *data)
 	if (ret)
 		return ret;
 
-	if (imx_handler->handler.flags & IMX_INTERNAL_FLAG_NAND)
+	if (imx_handler->handler.flags & IMX_INTERNAL_FLAG_NAND) {
+		/*
+		 * NAND is supported for i.MX image v2 only
+		 */
+		BUG_ON(imx_bbu_expected_filetype() != filetype_imx_image_v2);
+
 		ret = imx_bbu_internal_v2_write_nand_dbbt(imx_handler, data);
-	else
+	} else {
 		ret = imx_bbu_write_device(imx_handler, data->devicefile, data,
 					   data->image, data->len);
+	}
 
 	return ret;
 }
@@ -403,7 +422,7 @@ static struct imx_internal_bbu_handler *__init_handler(const char *name, char *d
 	handler->flags = flags;
 	handler->handler = imx_bbu_update;
 
-	imx_handler->expected_type = filetype_unknown;
+	imx_handler->expected_type = imx_bbu_expected_filetype();
 
 	return imx_handler;
 }
@@ -421,16 +440,14 @@ static int __register_handler(struct imx_internal_bbu_handler *imx_handler)
 
 static int
 imx_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
-				      unsigned long flags,
-				      enum filetype expected_type)
+				      unsigned long flags)
+
 {
 	struct imx_internal_bbu_handler *imx_handler;
 
 	imx_handler = __init_handler(name, devicefile, flags |
 				     IMX_BBU_FLAG_KEEP_HEAD);
 	imx_handler->flash_header_offset = FLASH_HEADER_OFFSET_MMC;
-
-	imx_handler->expected_type = expected_type;
 
 	return __register_handler(imx_handler);
 }
@@ -454,8 +471,7 @@ int imx51_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
 		unsigned long flags)
 {
 
-	return imx_bbu_internal_mmc_register_handler(name, devicefile, flags,
-						     filetype_unknown);
+	return imx_bbu_internal_mmc_register_handler(name, devicefile, flags);
 }
 
 /*
@@ -464,8 +480,7 @@ int imx51_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
 int imx53_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
 		unsigned long flags)
 {
-	return imx_bbu_internal_mmc_register_handler(name, devicefile, flags,
-						     filetype_imx_image_v2);
+	return imx_bbu_internal_mmc_register_handler(name, devicefile, flags);
 }
 
 /*
@@ -482,8 +497,6 @@ int imx53_bbu_internal_spi_i2c_register_handler(const char *name, char *devicefi
 				     IMX_INTERNAL_FLAG_ERASE);
 	imx_handler->flash_header_offset = FLASH_HEADER_OFFSET_MMC;
 
-	imx_handler->expected_type = filetype_imx_image_v2;
-
 	return __register_handler(imx_handler);
 }
 
@@ -499,7 +512,6 @@ int imx53_bbu_internal_nand_register_handler(const char *name,
 				     IMX_INTERNAL_FLAG_NAND);
 	imx_handler->flash_header_offset = FLASH_HEADER_OFFSET_MMC;
 
-	imx_handler->expected_type = filetype_imx_image_v2;
 	imx_handler->device_size = partition_size;
 
 	return __register_handler(imx_handler);
