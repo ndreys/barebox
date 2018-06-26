@@ -468,20 +468,15 @@ int imx51_bbu_internal_spi_i2c_register_handler(const char *name,
  * Register an i.MX51 internal boot update handler for MMC/SD
  */
 int imx51_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
-		unsigned long flags)
-{
-
-	return imx_bbu_internal_mmc_register_handler(name, devicefile, flags);
-}
+					    unsigned long flags)
+	__alias(imx_bbu_internal_mmc_register_handler);
 
 /*
  * Register an i.MX53 internal boot update handler for MMC/SD
  */
 int imx53_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
 		unsigned long flags)
-{
-	return imx_bbu_internal_mmc_register_handler(name, devicefile, flags);
-}
+	__alias(imx_bbu_internal_mmc_register_handler);
 
 /*
  * Register an i.MX6 internal boot update handler for i2c/spi
