@@ -452,8 +452,9 @@ imx_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
 	return __register_handler(imx_handler);
 }
 
-int imx51_bbu_internal_spi_i2c_register_handler(const char *name,
-		char *devicefile, unsigned long flags)
+static int
+imx_bbu_internal_spi_i2c_register_handler(const char *name, char *devicefile,
+					  unsigned long flags)
 {
 	struct imx_internal_bbu_handler *imx_handler;
 
@@ -463,6 +464,10 @@ int imx51_bbu_internal_spi_i2c_register_handler(const char *name,
 
 	return __register_handler(imx_handler);
 }
+
+int imx51_bbu_internal_spi_i2c_register_handler(const char *name,
+		char *devicefile, unsigned long flags)
+	__alias(imx_bbu_internal_spi_i2c_register_handler);
 
 /*
  * Register an i.MX51 internal boot update handler for MMC/SD
@@ -485,15 +490,7 @@ int imx53_bbu_internal_mmc_register_handler(const char *name, char *devicefile,
  */
 int imx53_bbu_internal_spi_i2c_register_handler(const char *name, char *devicefile,
 		unsigned long flags)
-{
-	struct imx_internal_bbu_handler *imx_handler;
-
-	imx_handler = __init_handler(name, devicefile, flags |
-				     IMX_INTERNAL_FLAG_ERASE);
-	imx_handler->flash_header_offset = FLASH_HEADER_OFFSET_MMC;
-
-	return __register_handler(imx_handler);
-}
+	__alias(imx_bbu_internal_spi_i2c_register_handler);
 
 /*
  * Register an i.MX53 internal boot update handler for NAND
