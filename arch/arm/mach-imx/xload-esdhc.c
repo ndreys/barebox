@@ -14,6 +14,7 @@
 #include <common.h>
 #include <io.h>
 #include <mci.h>
+#include <mach/atf.h>
 #include <mach/imx6-regs.h>
 #include <mach/imx8mq-regs.h>
 #include <mach/xload.h>
@@ -323,5 +324,5 @@ int imx8_esdhc_start_image(int instance)
 
 	esdhc.is_mx6 = 1;
 
-	return esdhc_start_image(&esdhc, MX8MQ_DDR_CSD1_BASE_ADDR, SZ_32K);
+	return esdhc_start_image(&esdhc, MX8MQ_ATF_BL33_BASE_ADDR, SZ_32K);
 }
