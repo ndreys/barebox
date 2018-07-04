@@ -833,25 +833,27 @@ static int rave_sp_probe(struct device_d *dev)
 		return ret;
 
 	serdev_device_set_baudrate(serdev, baud);
-
+#if 0
 	ret = rave_sp_get_status(sp);
 	if (ret) {
 		dev_warn(dev, "Failed to get firmware status: %d\n", ret);
 		return ret;
 	}
+#endif
 	/*
 	 * 10ms is just a setting that was arrived at empirically when
 	 * trying to make sure that EEPROM or MAC address access
 	 * commnads to not time out.
 	 */
 	serdev->polling_window = 10 * MSECOND;
-
+#if 0
 	/*
 	 * Those strings already have a \n embedded, so there's no
 	 * need to have one in format string.
 	 */
 	dev_info(dev, "Firmware version: %s",   sp->part_number_firmware);
 	dev_info(dev, "Bootloader version: %s", sp->part_number_bootloader);
+#endif
 
 	ret = rave_sp_add_params(sp);
 	if (ret) {
