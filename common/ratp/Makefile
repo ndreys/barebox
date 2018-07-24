@@ -5,3 +5,4 @@ obj-y += md.o
 obj-y += mw.o
 obj-y += reset.o
 obj-y += i2c.o
+obj-y += gpio.o
