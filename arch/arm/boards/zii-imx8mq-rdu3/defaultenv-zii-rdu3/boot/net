@@ -1,0 +1,4 @@
+#!/bin/sh
+
+global.bootm.image=/mnt/tftp/Image
+global.bootm.oftree=/mnt/tftp/fsl-imx8mq-rdu3.dtb

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+mmc1.probe=1
+mount /dev/mmc1.0
+
+global.bootm.image=/mnt/mmc1.0/Image
+global.bootm.oftree=/mnt/mmc1.0/fsl-imx8mq-evk.dtb
+global.linux.bootargs.base="console=ttymxc0,115200 earlycon=ec_imx6q,0x30860000,115200 root=/dev/mmcblk1p2 rootwait rw"
