@@ -540,3 +540,8 @@ pblb-$(CONFIG_MACH_NXP_IMX8MQ_EVK) += start_nxp_imx8mq_evk
 CFG_start_nxp_imx8mq_evk.pblb.imximg = $(board)/nxp-imx8mq-evk/flash-header-imx8mq-evk.imxcfg
 FILE_barebox-nxp-imx8mq-evk.img = start_nxp_imx8mq_evk.pblb.imximg
 image-$(CONFIG_MACH_NXP_IMX8MQ_EVK) += barebox-nxp-imx8mq-evk.img
+
+pblb-$(CONFIG_MACH_ZII_RDU3) += start_zii_imx8mq_rdu3
+CFG_start_zii_imx8mq_rdu3.pblb.imximg = $(board)/zii-imx8mq-rdu3/flash-header-zii-imx8mq-rdu3.imxcfg
+FILE_barebox-zii-imx8mq-rdu3.img = start_zii_imx8mq_rdu3.pblb.imximg
+image-$(CONFIG_MACH_ZII_RDU3) += barebox-zii-imx8mq-rdu3.img
