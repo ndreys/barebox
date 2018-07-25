@@ -1,0 +1,3 @@
+#!/bin/sh
+
+global.bootm.image=/mnt/tftp/barebox-nxp-imx8mq-evk.img

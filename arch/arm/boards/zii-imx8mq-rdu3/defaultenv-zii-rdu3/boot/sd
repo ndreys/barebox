@@ -1,0 +1,8 @@
+#!/bin/sh
+
+mmc1.probe=1
+mount /dev/mmc1.0
+
+global.bootm.image=/mnt/mmc1.0/Image
+global.bootm.oftree=/mnt/mmc1.0/zii-imx8mq-rdu3.dtb
+global.linux.bootargs.base="console=ttymxc0,115200 earlycon=ec_imx6q,0x30860000,115200 video=HDMI-A-1:1920x1080-32@60"
