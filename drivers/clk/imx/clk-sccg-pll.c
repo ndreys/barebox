@@ -103,29 +103,6 @@ static int clk_pll1_set_rate(struct clk *clk, unsigned long rate,
 	return 0;
 }
 
-static int clk_pll1_prepare(struct clk *clk)
-{
-	struct clk_sccg_pll *pll = to_clk_sccg_pll(clk);
-	u32 val;
-
-	val = readl(pll->base);
-	val &= ~(1 << PLL_PD);
-	writel(val, pll->base);
-
-	/* FIXME: PLL lock check */
-
-	return 0;
-}
-
-static void clk_pll1_unprepare(struct clk *clk)
-{
-	struct clk_sccg_pll *pll = to_clk_sccg_pll(clk);
-	u32 val;
-	val = readl(pll->base);
-	val |= (1 << PLL_PD);
-	writel(val, pll->base);
-}
-
 static unsigned long clk_pll2_recalc_rate(struct clk *clk,
 					 unsigned long parent_rate)
 {
@@ -198,8 +175,6 @@ static const struct clk_ops clk_sccg_pll1_ops = {
 };
 
 static const struct clk_ops clk_sccg_pll2_ops = {
-	.enable		= clk_pll1_prepare,
-	.disable	= clk_pll1_unprepare,
 	.recalc_rate	= clk_pll2_recalc_rate,
 	.round_rate	= clk_pll2_round_rate,
 	.set_rate	= clk_pll2_set_rate,
