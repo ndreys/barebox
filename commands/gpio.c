@@ -16,6 +16,17 @@
 #include <errno.h>
 #include <gpio.h>
 
+static int find_gpio(const char *arg)
+{
+	int gpio;
+
+	gpio = gpio_find_by_label(arg);
+	if (gpio_is_valid(gpio))
+		return gpio;
+
+	return simple_strtoul(arg, NULL, 0);
+}
+
 static int do_gpio_get_value(int argc, char *argv[])
 {
 	int gpio, value;
@@ -23,7 +34,7 @@ static int do_gpio_get_value(int argc, char *argv[])
 	if (argc < 2)
 		return COMMAND_ERROR_USAGE;
 
-	gpio = simple_strtoul(argv[1], NULL, 0);
+	gpio = find_gpio(argv[1]);
 
 	value = gpio_get_value(gpio);
 	if (value < 0)
@@ -32,11 +43,16 @@ static int do_gpio_get_value(int argc, char *argv[])
 	return value;
 }
 
+BAREBOX_CMD_HELP_START(gpio_generic)
+BAREBOX_CMD_HELP_TEXT("GPIO can be specified by number or label")
+BAREBOX_CMD_HELP_END
+
 BAREBOX_CMD_START(gpio_get_value)
 	.cmd		= do_gpio_get_value,
 	BAREBOX_CMD_DESC("return value of a GPIO pin")
 	BAREBOX_CMD_OPTS("GPIO")
 	BAREBOX_CMD_GROUP(CMD_GRP_HWMANIP)
+	BAREBOX_CMD_HELP(cmd_gpio_generic_help)
 BAREBOX_CMD_END
 
 static int do_gpio_set_value(int argc, char *argv[])
@@ -46,7 +62,7 @@ static int do_gpio_set_value(int argc, char *argv[])
 	if (argc < 3)
 		return COMMAND_ERROR_USAGE;
 
-	gpio = simple_strtoul(argv[1], NULL, 0);
+	gpio = find_gpio(argv[1]);
 	value = simple_strtoul(argv[2], NULL, 0);
 
 	gpio_set_value(gpio, value);
@@ -59,6 +75,7 @@ BAREBOX_CMD_START(gpio_set_value)
 	BAREBOX_CMD_DESC("set a GPIO's output value")
 	BAREBOX_CMD_OPTS("GPIO VALUE")
 	BAREBOX_CMD_GROUP(CMD_GRP_HWMANIP)
+	BAREBOX_CMD_HELP(cmd_gpio_generic_help)
 BAREBOX_CMD_END
 
 static int do_gpio_direction_input(int argc, char *argv[])
@@ -68,7 +85,7 @@ static int do_gpio_direction_input(int argc, char *argv[])
 	if (argc < 2)
 		return COMMAND_ERROR_USAGE;
 
-	gpio = simple_strtoul(argv[1], NULL, 0);
+	gpio = find_gpio(argv[1]);
 
 	ret = gpio_direction_input(gpio);
 	if (ret)
@@ -82,6 +99,7 @@ BAREBOX_CMD_START(gpio_direction_input)
 	BAREBOX_CMD_DESC("set direction of a GPIO pin to input")
 	BAREBOX_CMD_OPTS("GPIO")
 	BAREBOX_CMD_GROUP(CMD_GRP_HWMANIP)
+	BAREBOX_CMD_HELP(cmd_gpio_generic_help)
 BAREBOX_CMD_END
 
 static int do_gpio_direction_output(int argc, char *argv[])
@@ -91,7 +109,7 @@ static int do_gpio_direction_output(int argc, char *argv[])
 	if (argc < 3)
 		return COMMAND_ERROR_USAGE;
 
-	gpio = simple_strtoul(argv[1], NULL, 0);
+	gpio = find_gpio(argv[1]);
 	value = simple_strtoul(argv[2], NULL, 0);
 
 	ret = gpio_direction_output(gpio, value);
@@ -106,4 +124,5 @@ BAREBOX_CMD_START(gpio_direction_output)
 	BAREBOX_CMD_DESC("set direction of a GPIO pin to output")
 	BAREBOX_CMD_OPTS("GPIO VALUE")
 	BAREBOX_CMD_GROUP(CMD_GRP_HWMANIP)
+	BAREBOX_CMD_HELP(cmd_gpio_generic_help)
 BAREBOX_CMD_END
