@@ -31,7 +31,21 @@
 #include <mach/bbu.h>
 #include <mach/generic.h>
 
-#define FLASH_HEADER_OFFSET_MMC		0x400
+static unsigned long imx_bbu_flash_header_offset_mmc(void)
+{
+	unsigned long offset = SZ_1K;
+
+	/*
+	 * i.MX8MQ moved the header by 32K to accomodate for GPT
+	 * partition tables
+	 */
+	if (cpu_is_mx8mq())
+		offset += SZ_32K;
+
+	return offset;
+}
+
+#define FLASH_HEADER_OFFSET_MMC		imx_bbu_flash_header_offset_mmc()
 
 #define IMX_INTERNAL_FLAG_NAND		BIT(31)
 #define IMX_INTERNAL_FLAG_ERASE		BIT(30)
