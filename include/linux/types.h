@@ -2,6 +2,7 @@
 #define _LINUX_TYPES_H
 
 #include <linux/posix_types.h>
+#include <linux/bitops.h>
 #include <asm/types.h>
 
 #define DECLARE_BITMAP(name,bits) \
