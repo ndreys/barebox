@@ -12,7 +12,7 @@ void ddr_cfg_phy(void);
 void ddr_init(void)
 {
 	volatile unsigned int tmp, tmp_t;
-	
+
 	/** Initialize DDR clock and DDRC registers **/
 	reg32_write(0x3038a088,0x7070000);
 	reg32_write(0x3038a084,0x4030000);
@@ -78,12 +78,12 @@ void ddr_init(void)
 	reg32_write(0x3d4001c4,0x1);
 	reg32_write(0x3d4000f4,0x639);
 	reg32_write(0x3d400108,0x70e1214);
-	reg32_write(0x3d400200,0x15);
+	reg32_write(0x3d400200,0x17);
 	reg32_write(0x3d40020c,0x0);
 	reg32_write(0x3d400210,0x1f1f);
 	reg32_write(0x3d400204,0x80808);
 	reg32_write(0x3d400214,0x7070707);
-	reg32_write(0x3d400218,0x48080707);
+	reg32_write(0x3d400218,0x7070707);
 	reg32_write(0x3d402020,0x1);
 	reg32_write(0x3d402024,0x518b00);
 	reg32_write(0x3d402050,0x20d040);

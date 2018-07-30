@@ -27,9 +27,6 @@
 
 #include "ddr.h"
 
-//#define STEP_2
-// #define STEP_5
-
 extern char __dtb_imx8mq_zii_rdu3_start[];
 
 #define UART_PAD_CTRL	MUX_PAD_CTRL(PAD_CTL_DSE_3P3V_45_OHM)
@@ -51,14 +48,6 @@ static void setup_uart(void)
 	imx8_uart_setup_ll();
 
 	putc_ll('>');
-
-#ifdef STEP_2
-	/*
-	 * Testing basic UART Tx functionality as per cell
-	 */
-	for (;;)
-		puts_ll("UART test output\n");
-#endif
 }
 
 static void zii_imx8mq_rdu3_sram_setup(void)
@@ -69,14 +58,6 @@ static void zii_imx8mq_rdu3_sram_setup(void)
 
 	ddr_init();
 
-#ifdef STEP_5
-	/*
-	 * Spinning inplace to allow for DDR testing with OpenOCD
-	 */
-	puts_ll("DDR initialized. Execution halted\n");
-	hang();
-#endif	
-
 	imx8_get_boot_source(&src, &instance);
 
 	if (src == BOOTSOURCE_MMC)
@@ -86,7 +67,7 @@ static void zii_imx8mq_rdu3_sram_setup(void)
 }
 
 /*
- * Power-on execution flow of start_nxp_imx8mq_evk() might not be
+ * Power-on execution flow of start_zii_imx8mq_rdu3() might not be
  * obvious for a very frist read, so here's, hopefully helpful,
  * summary:
  *
@@ -141,5 +122,5 @@ ENTRY_FUNCTION(start_zii_imx8mq_rdu3, r0, r1, r2)
 	 * Standard entry we hit once we initialized both DDR and ATF
 	 */
 	barebox_arm_entry(MX8MQ_DDR_CSD1_BASE_ADDR,
-			  SZ_2G + SZ_1G, __dtb_imx8mq_zii_rdu3_start);
+			  SZ_4G, __dtb_imx8mq_zii_rdu3_start);
 }
