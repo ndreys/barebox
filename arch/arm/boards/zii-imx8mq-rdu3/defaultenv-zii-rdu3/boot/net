@@ -1,4 +1,5 @@
 #!/bin/sh
 
+global.linux.bootargs.base="nointrd earlyprintk"
 global.bootm.image=/mnt/tftp/Image
-global.bootm.oftree=/mnt/tftp/fsl-imx8mq-rdu3.dtb
+global.bootm.oftree=/mnt/tftp/zii-imx8mq-rdu3.dtb
