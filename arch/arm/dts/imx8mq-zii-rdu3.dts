@@ -9,6 +9,7 @@
 #include <arm64/freescale/imx8mq.dtsi>
 
 #include "imx8mq.dtsi"
+#include "imx8mq-ddrc.dtsi"
 
 / {
 	model = "ZII i.MX8MQ RDU3 Board";
@@ -21,11 +22,6 @@
 			compatible = "barebox,environment";
 			device-path = &nor_flash, "partname:barebox-environment";
 		};
-	};
-
-	memory@40000000 {
-		device_type = "memory";
-		reg = <0x00000000 0x40000000 0x000000001 0x00000000>;
 	};
 
 	mdio0: bitbang-mdio {
