@@ -224,7 +224,7 @@ esdhc_start_image(struct esdhc *esdhc, ptrdiff_t address, ptrdiff_t entry, u32 o
 {
 
 	void *buf = (void *)address;
-	struct imx_flash_header_v2 *hdr = buf + offset + SZ_1K;
+	struct imx_flash_header_v2 *hdr;
 	int ret, len;
 	void __noreturn (*bb)(void);
 	unsigned int ofs;
@@ -232,9 +232,12 @@ esdhc_start_image(struct esdhc *esdhc, ptrdiff_t address, ptrdiff_t entry, u32 o
 	len = imx_image_size();
 	len = ALIGN(len, SECTOR_SIZE);
 
+re_read_header:
 	ret = esdhc_read_blocks(esdhc, buf, offset + SZ_1K + SECTOR_SIZE);
 	if (ret)
 		return ret;
+
+	hdr = buf + offset + SZ_1K;
 
 	if (!is_imx_flash_header_v2(hdr)) {
 		pr_debug("IVT header not found on SD card. "
@@ -242,6 +245,12 @@ esdhc_start_image(struct esdhc *esdhc, ptrdiff_t address, ptrdiff_t entry, u32 o
 			 hdr->header.tag, hdr->header.length,
 			 hdr->header.version);
 		return -EINVAL;
+	}
+
+	if (IS_ENABLED(CONFIG_ARCH_IMX8MQ) &&
+	    hdr->boot_data.plugin & PLUGIN_HDMI_IMAGE) {
+		offset += 0x1a000;
+		goto re_read_header;
 	}
 
 	pr_debug("Check ok, loading image\n");
