@@ -47,6 +47,8 @@ struct imx_dcd_rec_v1 {
 #define PARAMETER_FLAG_MASK	(1 << 3)
 #define PARAMETER_FLAG_SET	(1 << 4)
 
+#define PLUGIN_HDMI_IMAGE	0x0002
+
 struct imx_ivt_header {
 	uint8_t tag;
 	uint16_t length;
@@ -94,6 +96,7 @@ struct config_data {
 	int (*nop)(const struct config_data *data);
 	int csf_space;
 	char *csf;
+	char *signed_hdmi_firmware_file;
 };
 
 #define MAX_RECORDS_DCD_V2 1024
