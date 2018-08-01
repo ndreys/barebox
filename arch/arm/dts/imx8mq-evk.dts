@@ -8,17 +8,15 @@
 
 #include <arm64/freescale/imx8mq.dtsi>
 
+#include "imx8mq.dtsi"
+#include "imx8mq-ddrc.dtsi"
+
 / {
 	model = "NXP i.MX8MQ EVK";
 	compatible = "fsl,imx8mq-evk", "fsl,imx8mq";
 
 	chosen {
 		stdout-path = &uart1;
-	};
-
-	memory@40000000 {
-		device_type = "memory";
-		reg = <0x00000000 0x40000000 0 0xc0000000>;
 	};
 
 	reg_usdhc2_vmmc: regulator-vsd-3v3 {
