@@ -23,6 +23,7 @@
 #include <init.h>
 #include <of.h>
 #include <linux/err.h>
+#include <linux/bitfield.h>
 #include <asm/barebox-arm.h>
 #include <asm/memory.h>
 #include <mach/esdctl.h>
@@ -38,6 +39,7 @@
 #include <mach/imx53-regs.h>
 #include <mach/imx6-regs.h>
 #include <mach/vf610-ddrmc.h>
+#include <mach/imx8mq-regs.h>
 
 struct imx_esdctl_data {
 	unsigned long base0;
@@ -319,6 +321,76 @@ static void vf610_ddrmc_add_mem(void *mmdcbase, struct imx_esdctl_data *data)
 			   vf610_ddrmc_sdram_size(mmdcbase));
 }
 
+#define DDRC_ADDRMAP(n)				(0x200 + 4 * (n))
+#define DDRC_ADDRMAP6_LPDDR4_6GB_12GB_24GB	GENMASK(30, 29)
+#define DDRC_ADDRMAP0_CS_BIT0			GENMASK(4, 0)
+
+#define DDRC_MSTR				0x0000
+#define DDRC_MSTR_LPDDR4			BIT(5)
+#define DDRC_MSTR_DATA_BUS_WIDTH		GENMASK(13, 12)
+#define DDRC_MSTR_ACTIVE_RANKS			GENMASK(27, 24)
+
+static resource_size_t imx8mq_ddrc_sdram_size(void __iomem *ddrc)
+{
+	const u32 addrmap6 = readl(ddrc + DDRC_ADDRMAP(6));
+	const u32 addrmap0 = readl(ddrc + DDRC_ADDRMAP(0));
+	const u32 mstr = readl(ddrc + DDRC_MSTR);
+	resource_size_t size = 0;
+	unsigned long dbw, cs0, r;
+
+	BUG_ON(!(mstr & DDRC_MSTR_LPDDR4));
+
+	switch (FIELD_GET(DDRC_ADDRMAP6_LPDDR4_6GB_12GB_24GB, addrmap6)) {
+	case 0b00:
+		cs0 = FIELD_GET(DDRC_ADDRMAP0_CS_BIT0, addrmap0) + 6;
+
+		switch (FIELD_GET(DDRC_MSTR_DATA_BUS_WIDTH, mstr)) {
+		case 0b00:	/* Full DQ bus  */
+			dbw = 1;
+			break;
+		case 0b01:      /* Half DQ bus  */
+			dbw = 0;
+			break;
+		case 0b10:	/* Quarter DQ bus  */
+		case 0b11:	/* Reserved */
+			BUG();
+		}
+
+		switch (FIELD_GET(DDRC_MSTR_ACTIVE_RANKS, mstr)) {
+		case 0b0001:
+			r = 0;
+			break;
+		case 0b0011:
+			r = 1;
+			break;
+		case 0b1111:
+			r = 2;
+			break;
+		default:
+			BUG();
+		}
+		
+		size = 1UL << (cs0 + 1 + dbw + r);
+		break;
+	case 0b01:
+		size = SZ_1G + SZ_512M;
+		break;
+	case 0b10:
+		size = SZ_2G + SZ_1G;
+		break;
+	default:
+		BUG();
+	}
+
+	return size;
+}
+
+static void imx8mq_ddrc_add_mem(void *mmdcbase, struct imx_esdctl_data *data)
+{
+	arm_add_mem_device("ram0", data->base0,
+			   imx8mq_ddrc_sdram_size(mmdcbase));
+}
+
 static int imx_esdctl_probe(struct device_d *dev)
 {
 	struct resource *iores;
@@ -405,6 +477,11 @@ static __maybe_unused struct imx_esdctl_data vf610_data = {
 	.add_mem = vf610_ddrmc_add_mem,
 };
 
+static __maybe_unused struct imx_esdctl_data imx8mq_data = {
+	.base0 = MX8MQ_DDR_CSD1_BASE_ADDR,
+	.add_mem = imx8mq_ddrc_add_mem,
+};
+
 static struct platform_device_id imx_esdctl_ids[] = {
 #ifdef CONFIG_ARCH_IMX1
 	{
@@ -470,6 +547,9 @@ static __maybe_unused struct of_device_id imx_esdctl_dt_ids[] = {
 		.compatible = "fsl,vf610-ddrmc",
 		.data = &vf610_data
 	}, {
+		.compatible = "fsl,imx8mq-ddrc",
+		.data = &imx8mq_data
+	}, {		
 		/* sentinel */
 	}
 };
@@ -642,4 +722,12 @@ void __noreturn vf610_barebox_entry(void *boarddata)
 	barebox_arm_entry(VF610_RAM_BASE_ADDR,
 			  vf610_ddrmc_sdram_size(IOMEM(VF610_DDR_BASE_ADDR)),
 			  boarddata);
+}
+
+void __noreturn imx8mq_barebox_entry(void *boarddata)
+{
+	resource_size_t size;
+
+	size = imx8mq_ddrc_sdram_size(IOMEM(MX8MQ_DDRC_CTL_BASE_ADDR));
+	barebox_arm_entry(MX8MQ_DDR_CSD1_BASE_ADDR, size, boarddata);
 }
