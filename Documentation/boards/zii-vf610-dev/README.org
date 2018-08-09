@@ -1,0 +1,16 @@
+* Building
+
+  #+BEGIN_SRC
+  make ARCH=arm CROSS_COMPILE=<ARM toolchain prefix> mrproper
+  make ARCH=arm CROSS_COMPILE=<ARM toolchain prefix> zii_vf610_dev_defconfig
+  make ARCH=arm CROSS_COMPILE=<ARM toolchain prefix>
+  #+END_SRC
+
+* Uploading code
+
+  #+BEGIN_SRC
+  cd barebox
+  openocd -f Documentation/boards/zii-vf610-dev/zii-vybrid-revb1.cfg --command "init; safe_reset; load_image images/barebox-zii-vf610-dev.img 0x80000000 bin; arm core_state arm; resume 0x80000000"
+  #+END_SRC
+
+
