@@ -1,0 +1,34 @@
+* Building
+
+  #+BEGIN_SRC
+  make ARCH=arm CROSS_COMPILE=<ARM toolchain prefix> mrproper
+  make ARCH=arm CROSS_COMPILE=<ARM toolchain prefix> zii_vf610_dev_defconfig
+  make ARCH=arm CROSS_COMPILE=<ARM toolchain prefix>
+  #+END_SRC
+
+* Uploading code
+
+  #+BEGIN_SRC
+  cd barebox
+  openocd -f Documentation/boards/zii-vf610-dev/zii-vybrid-revb1.cfg --command "init; safe_reset; load_image images/barebox-zii-vf610-dev.img 0x80000000 bin; arm core_state arm; resume 0x80000000"
+  #+END_SRC
+
+* Writing Barebox to NVM
+
+  With exception of Dev boards, all of ZII's VF610 based boards should
+  come with eMMC. To permanently write Barebox to it do:
+  #+BEGIN_SRC
+  barebox_update -t eMMC -y <barebox.img>
+  #+END_SRC
+
+  This should also automaticaly configure your board to boot that
+  image. Note that original ZII stack's bootloader in eMMC should be
+  left intact. Barebox is configure to be programmed to one of MMC
+  boot partitions, whereas original bootloader is located in user
+  partition.
+
+  To restore the board to booting using original bootloader do:
+  #+BEGIN_SRC
+  detect mmc0
+  mmc0.boot=disabled
+  #+END_SRC
