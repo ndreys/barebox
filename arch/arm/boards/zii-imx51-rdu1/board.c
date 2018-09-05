@@ -29,6 +29,13 @@
 
 #include <envfs.h>
 
+struct zii_rdu1_lru_fixup {
+	struct zii_pn_fixup fixup;
+	uint8_t touchscreen_address;
+	const char *display;
+	const char *mode_name;
+};
+
 static int zii_rdu1_init(void)
 {
 	const char *hostname;
@@ -295,12 +302,114 @@ static const struct zii_pn_fixup zii_rdu1_dds_fixups[] = {
 	{ "05-0004-02-E3", zii_rdu1_sp_switch_eeprom }
 };
 
+static int zii_rdu1_fixup_touchscreen(struct device_node *root, void *context)
+{
+	const struct zii_rdu1_lru_fixup *fixup = context;
+	char touchscreen[sizeof("touchscreen@NN") + 1];
+	struct device_node *i2c_node, *node;
+
+	i2c_node = of_find_node_by_alias(root, "i2c1");
+	if (!i2c_node)
+		return -ENODEV;
+
+	snprintf(touchscreen, sizeof(touchscreen), "touchscreen@%02x",
+		 fixup->touchscreen_address);
+
+	node = of_find_node_by_name(i2c_node, touchscreen);
+	if (!node)
+		return -ENODEV;
+
+	pr_info("Enabling touchscreen device \"%s\".\n", touchscreen);
+
+	of_device_enable(node);
+	return 0;
+}
+
+static int zii_rdu1_fixup_display(struct device_node *root, void *context)
+{
+	const struct zii_rdu1_lru_fixup *fixup = context;
+	struct device_node *node;
+
+	pr_info("Enabling panel with compatible \"%s\".\n", fixup->display);
+
+	node = of_find_node_by_name(root, "panel");
+	if (!node)
+		return -ENODEV;
+
+	of_device_enable(node);
+	of_property_write_string(node, "compatible", fixup->display);
+
+	return 0;
+}
+
+static void zii_rdu1_lru_fixup(const struct zii_pn_fixup *context)
+{
+	const struct zii_rdu1_lru_fixup *fixup =
+		container_of(context, struct zii_rdu1_lru_fixup, fixup);
+	struct device_d *fb0;
+
+	pr_info("%s: %s %x", fixup->fixup.pn, fixup->display,
+		fixup->touchscreen_address);
+
+	if (fixup->touchscreen_address)
+		of_register_fixup(zii_rdu1_fixup_touchscreen, (void *)fixup);
+
+	if (!fixup->display)
+		return;
+
+	of_register_fixup(zii_rdu1_fixup_display, (void *)fixup);
+
+	fb0 = get_device_by_name("fb0");
+	if (!fb0) {
+		pr_warn("fb0 device not found!\n");
+		return;
+	}
+
+	if (dev_set_param(fb0, "mode_name", fixup->mode_name)) {
+		pr_warn("failed to set fb0.mode_name to \'%s\'\n",
+			fixup->mode_name);
+		return;
+	}
+}
+
+#define RDU1_LRU_FIXUP(__pn, __touchscreen_address, __panel)	\
+	{							\
+		{ __pn, zii_rdu1_lru_fixup },			\
+		__touchscreen_address,				\
+	       __panel						\
+	}
+
+#define RDU1_PANEL_UNKNOWN	NULL, NULL
+#define RDU1_PANEL_8P9		"toshiba,lt089ac29000", "toshiba89"
+#define RDU1_PANEL_12P1		RDU1_PANEL_UNKNOWN
+#define RDU1_PANEL_15P3		RDU1_PANEL_UNKNOWN
+#define RDU1_PANEL_15P4		"innolux,g154i1-le1", "chimei15"
+#define RDU1_PANEL_17P5		RDU1_PANEL_UNKNOWN
+
+static const struct zii_rdu1_lru_fixup zii_rdu1_lru_fixups[] = {
+	RDU1_LRU_FIXUP("00-5103-01", 0x4c, RDU1_PANEL_12P1),
+	RDU1_LRU_FIXUP("00-5103-30", 0x20, RDU1_PANEL_12P1),
+	RDU1_LRU_FIXUP("00-5103-31", 0x20, RDU1_PANEL_12P1),
+	RDU1_LRU_FIXUP("00-5104-03", 0x00, RDU1_PANEL_15P3),
+	RDU1_LRU_FIXUP("00-5105-01", 0x4b, RDU1_PANEL_8P9),
+	RDU1_LRU_FIXUP("00-5105-20", 0x4b, RDU1_PANEL_8P9),
+	RDU1_LRU_FIXUP("00-5105-30", 0x20, RDU1_PANEL_8P9),
+	RDU1_LRU_FIXUP("00-5108-01", 0x4c, RDU1_PANEL_15P3),
+	RDU1_LRU_FIXUP("00-5109-01", 0x00, RDU1_PANEL_15P3),
+	RDU1_LRU_FIXUP("00-5118-30", 0x20, RDU1_PANEL_15P4),
+	RDU1_LRU_FIXUP("00-5506-01", 0x4c, RDU1_PANEL_15P4),
+	RDU1_LRU_FIXUP("00-5507-01", 0x4c, RDU1_PANEL_17P5),
+	RDU1_LRU_FIXUP("00-5511-01", 0x4c, RDU1_PANEL_15P4),
+	RDU1_LRU_FIXUP("00-5512-01", 0x4c, RDU1_PANEL_17P5),
+};
+
 static int zii_rdu1_process_fixups(void)
 {
 	if (!of_machine_is_compatible("zii,imx51-rdu1"))
 		return 0;
 
 	zii_process_dds_fixups(zii_rdu1_dds_fixups);
+	zii_process_lru_fixups(zii_rdu1_lru_fixups);
 
 	return 0;
 }
