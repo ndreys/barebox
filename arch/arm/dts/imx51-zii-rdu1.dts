@@ -96,6 +96,22 @@
 				vsync-active = <0>;
 				de-active = <1>;
 			};
+			
+			nec12 {
+				clock-frequency = <71000000>;
+				hactive = <1280>;
+				vactive = <800>;
+				hback-porch = <100>;
+				hsync-len = <30>;
+				hfront-porch = <30>;
+				vback-porch = <11>;
+				vsync-len = <7>;
+				vfront-porch = <5>;
+				pixelclk-active = <0>;
+				hsync-active = <0>;
+				vsync-active = <0>;
+				de-active = <1>;
+			};
 		};
 	};
 };

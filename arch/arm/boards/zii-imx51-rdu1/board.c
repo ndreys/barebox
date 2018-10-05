@@ -272,7 +272,8 @@ static struct rdu1_display_type {
 	const char *compatible;	/* compatible for kernel DT */
 } display_types[] = {
 	{ "Toshiba89", "toshiba89", "toshiba,lt089ac29000" },
-	{ "CHIMEI15", "chimei15", "innolux,g154i1-le1" }
+	{ "CHIMEI15", "chimei15", "innolux,g154i1-le1" },
+	{ "NEC12", "nec12", "nec,nl12880bc20-05" },
 }, *current_dt;
 
 static int rdu1_fixup_display(struct device_node *root, void *context)
