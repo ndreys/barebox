@@ -350,9 +350,6 @@ static void zii_rdu1_lru_fixup(const struct zii_pn_fixup *context)
 		container_of(context, struct zii_rdu1_lru_fixup, fixup);
 	struct device_d *fb0;
 
-	pr_info("%s: %s %x", fixup->fixup.pn, fixup->display,
-		fixup->touchscreen_address);
-
 	if (fixup->touchscreen_address)
 		of_register_fixup(zii_rdu1_fixup_touchscreen, (void *)fixup);
 
