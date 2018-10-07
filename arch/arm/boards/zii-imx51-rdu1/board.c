@@ -283,21 +283,25 @@ late_initcall(zii_rdu1_disable_sp_node);
 
 static void zii_rdu1_sp_switch_eeprom(const struct zii_pn_fixup *fixup)
 {
-	struct device_node *np, *root;
-	struct cdev *cdev;
+	struct device_node *np, *root, *sp_node;
+	struct device_d *sp_dev;
 
 	root = of_get_root_node();
 	np   = of_find_node_by_name(root, "eeprom@ae");
 	if (WARN_ON(!np))
 		return;
 
-	cdev = cdev_by_device_node(np);
-	if (!cdev) {
-		pr_err("Couldn't find switch eeprom\n");
+	sp_node = of_find_node_by_name(root, "rave-sp");
+	if (WARN_ON(!sp_node))
 		return;
-	}
 
-	WARN_ON(devfs_create_link(cdev, "switch-eeprom"));
+	sp_dev = of_find_device_by_node(sp_node);
+	if (WARN_ON(!sp_dev))
+		return;
+
+	of_device_enable(np);
+
+	WARN_ON(!of_platform_device_create(np, sp_dev));
 }
 
 static const struct zii_pn_fixup zii_rdu1_dds_fixups[] = {
