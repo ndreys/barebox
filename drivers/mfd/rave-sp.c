@@ -789,7 +789,7 @@ static int rave_sp_add_params(struct rave_sp *sp)
 	int ret;
 
 	dev->parent = sp->serdev->dev;
-	strcpy(dev->name, "sp");
+	dev_set_name(dev, "sp");
 	dev->id = DEVICE_ID_SINGLE;
 
 	ret = register_device(dev);
