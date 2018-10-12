@@ -105,6 +105,7 @@ static int rave_sp_aiodev_probe(struct device_d *dev)
 
 	aiodev = xzalloc(sizeof(*aiodev));
 	aiodev->name = np->name;
+	aiodev->hwdev = dev;
 	aiodev->read = variant->read;
 	aiodev->num_channels = num_channels;
 	aiodev->channels = xmalloc(num_channels * sizeof(aiodev->channels[0]));
