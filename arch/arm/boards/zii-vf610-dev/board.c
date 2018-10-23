@@ -22,62 +22,6 @@
 #include <envfs.h>
 #include <mach/bbu.h>
 
-
-static int expose_signals(const struct gpio *signals,
-			  size_t signal_num)
-{
-	int ret, i;
-
-	ret = gpio_request_array(signals, signal_num);
-	if (ret)
-		return ret;
-
-	for (i = 0; i < signal_num; i++)
-		export_env_ull(signals[i].label, signals[i].gpio);
-
-	return 0;
-}
-
-static int zii_vf610_cfu1_expose_signals(void)
-{
-	static const struct gpio signals[] = {
-		{
-			.gpio  = 132,
-			.flags = GPIOF_IN,
-			.label = "fim_sd",
-		},
-		{
-			.gpio  = 118,
-			.flags = GPIOF_OUT_INIT_LOW,
-			.label = "fim_tdis",
-		},
-	};
-
-	if (!of_machine_is_compatible("zii,vf610cfu1"))
-		return 0;
-
-	return expose_signals(signals, ARRAY_SIZE(signals));
-}
-late_initcall(zii_vf610_cfu1_expose_signals);
-
-static int zii_vf610_cfu1_spu3_expose_signals(void)
-{
-	static const struct gpio signals[] = {
-		{
-			.gpio  = 98,
-			.flags = GPIOF_IN,
-			.label = "e6352_intn",
-		},
-	};
-
-	if (!of_machine_is_compatible("zii,vf610spu3") &&
-	    !of_machine_is_compatible("zii,vf610cfu1"))
-		return 0;
-
-	return expose_signals(signals, ARRAY_SIZE(signals));
-}
-late_initcall(zii_vf610_cfu1_spu3_expose_signals);
-
 static int zii_vf610_dev_print_clocks(void)
 {
 	int i;
