@@ -33,3 +33,29 @@
 		label = "fiber0";
 	};
 };
+
+&gpio3 {
+	fim-tdis {
+		gpio-hog;
+		gpios = <22 GPIO_ACTIVE_HIGH>;
+		output-low;
+		line-name = "fim_tdis";
+	};
+
+	e6352-intn {
+		gpio-hog;
+		gpios = <2 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "e6352_intn";
+	};
+};
+
+&gpio4 {
+	fim-sd {
+		gpio-hog;
+		gpios = <4 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "fim_sd";
+	};
+};
+

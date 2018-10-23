@@ -14,3 +14,12 @@
 		switch-eeprom = &switch0;
 	};
 };
+
+&gpio3 {
+	e6352-intn {
+		gpio-hog;
+		gpios = <2 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "e6352_intn";
+	};
+};
