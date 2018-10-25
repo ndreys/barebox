@@ -218,6 +218,79 @@
 			};
 		};
 
+		leds-front {
+			compatible = "zii,rave-sp-leds";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			led-sources = <0>;
+
+			led@0 {
+				label = "rave-sp:red:front";
+				reg = <0>;
+			};
+
+			led@1 {
+				label = "rave-sp:green:front";
+				reg = <1>;
+			};
+
+			led@2 {
+				label = "rave-sp:blue:front";
+				reg = <2>;
+			};
+		};
+
+		leds-mood {
+			compatible = "zii,rave-sp-leds";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			led-sources = <1>;
+
+			led@0 {
+				label = "rave-sp:red:mood";
+				reg = <0>;
+			};
+
+			led@1 {
+				label = "rave-sp:green:mood";
+				reg = <1>;
+			};
+
+			led@2 {
+				label = "rave-sp:blue:mood";
+				reg = <2>;
+			};
+		};
+
+		leds-reading {
+			compatible = "zii,rave-sp-leds";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			led-sources = <1>;
+
+			leds@1 {
+				label = "rave-sp:white:reading";
+				reg = <1>;
+			};
+		};
+
+		leds-legacy {
+			compatible = "zii,rave-sp-leds-legacy";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			led-sources = <1>;
+
+			leds@0 {
+				label = "rave-sp:amber:power";
+				reg = <0>;
+			};
+
+			leds@1 {
+				label = "rave-sp:white:connector";
+				reg = <1>;
+			};
+		};
+
 		sensor-temperature {
 			compatible = "zii,rave-sp-sensor-temperature";
 			status = "okay";
