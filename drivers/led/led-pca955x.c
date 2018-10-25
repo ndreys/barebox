@@ -66,12 +66,6 @@
 #define PCA955X_LS_BLINK0	0x2	/* Blink at PWM0 rate */
 #define PCA955X_LS_BLINK1	0x3	/* Blink at PWM1 rate */
 
-enum led_brightness {
-	LED_OFF		= 0,
-	LED_HALF	= 127,
-	LED_FULL	= 255,
-};
-
 enum pca955x_type {
 	pca9550,
 	pca9551,

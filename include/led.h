@@ -58,6 +58,13 @@ enum trigger_type {
 	TRIGGER_FLASH,
 };
 
+enum led_brightness {
+	LED_OFF		= 0,
+	LED_ON		= 1,
+	LED_HALF	= 127,
+	LED_FULL	= 255,
+};
+
 #ifdef CONFIG_LED_TRIGGERS
 int led_set_trigger(enum led_trigger trigger, struct led *led);
 void led_trigger_disable(struct led *led);
