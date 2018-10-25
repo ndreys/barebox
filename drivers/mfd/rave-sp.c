@@ -114,36 +114,7 @@ struct rave_sp_checksum {
 	void (*subroutine)(const u8 *, size_t, u8 *);
 };
 
-struct rave_sp_version {
-	u8     hardware;
-	__le16 major;
-	u8     minor;
-	u8     letter[2];
-} __packed;
-
-struct rave_sp_status {
-	struct rave_sp_version bootloader_version;
-	struct rave_sp_version firmware_version;
-	u16 rdu_eeprom_flag;
-	u16 dds_eeprom_flag;
-	u8  pic_flag;
-	u8  orientation;
-	u32 etc;
-	s16 temp[2];
-	u8  backlight_current[3];
-	u8  dip_switch;
-	u8  host_interrupt;
-	u16 voltage_28;
-	u8  i2c_device_status;
-	u8  power_status;
-	u8  general_status;
 #define RAVE_SP_STATUS_GS_FIRMWARE_MODE	BIT(1)
-
-	u8  deprecated1;
-	u8  power_led_status;
-	u8  deprecated2;
-	u8  periph_power_shutoff;
-} __packed;
 
 /**
  * struct rave_sp_variant_cmds - Variant specific command routines
@@ -669,28 +640,19 @@ static int rave_sp_emulated_get_status(struct rave_sp *sp,
 	return 0;
 }
 
-static int rave_sp_get_status(struct rave_sp *sp)
+int rave_sp_get_status(struct rave_sp *sp, struct rave_sp_status *status)
 {
 	struct device_d *dev = sp->serdev->dev;
-	struct rave_sp_status status;
-	const char *mode;
 	int ret;
 
-	ret = sp->variant->cmd.get_status(sp, &status);
+	ret = sp->variant->cmd.get_status(sp, status);
 	if (ret)
 		return ret;
 
-	if (status.general_status & RAVE_SP_STATUS_GS_FIRMWARE_MODE)
-		mode = "Application";
-	else
-		mode = "Bootloader";
-
-	dev_info(dev, "Device is in %s mode\n", mode);
-
 	sp->part_number_firmware   = devm_rave_sp_version(dev,
-						   &status.firmware_version);
+						  &status->firmware_version);
 	sp->part_number_bootloader = devm_rave_sp_version(dev,
-						   &status.bootloader_version);
+						  &status->bootloader_version);
 	return 0;
 }
 
@@ -855,7 +817,9 @@ static int rave_sp_add_params(struct rave_sp *sp)
 static int rave_sp_probe(struct device_d *dev)
 {
 	struct serdev_device *serdev = to_serdev_device(dev->parent);
+	struct rave_sp_status status;
 	struct rave_sp *sp;
+	const char *mode;
 	u32 baud;
 	int ret;
 
@@ -889,11 +853,19 @@ static int rave_sp_probe(struct device_d *dev)
 
 	serdev_device_set_baudrate(serdev, baud);
 
-	ret = rave_sp_get_status(sp);
+	ret = rave_sp_get_status(sp, &status);
 	if (ret) {
 		dev_warn(dev, "Failed to get firmware status: %d\n", ret);
 		return ret;
 	}
+
+	if (status.general_status & RAVE_SP_STATUS_GS_FIRMWARE_MODE)
+		mode = "Application";
+	else
+		mode = "Bootloader";
+
+	dev_info(dev, "Device is in %s mode\n", mode);
+
 	/*
 	 * 10ms is just a setting that was arrived at empirically when
 	 * trying to make sure that EEPROM or MAC address access
