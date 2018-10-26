@@ -1435,6 +1435,17 @@ config CMD_FBTEST
 	  Framebuffer test command that allows to produce a number of
 	  test patterns on a screen.
 
+config CMD_TEXTBOX
+       bool
+       depends on VIDEO
+       select 2D_PRIMITIVES
+       select IMAGE_RENDERER
+       prompt "FB test"
+       prompt "textbox"
+       help
+         Display a textbox on a framebuffer device
+
+
 config CMD_READLINE
 	tristate
 	prompt "readline"
