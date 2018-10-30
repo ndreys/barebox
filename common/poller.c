@@ -14,7 +14,6 @@
 #include <clock.h>
 
 static LIST_HEAD(poller_list);
-static int poller_active;
 
 int poller_register(struct poller_struct *poller)
 {
@@ -109,13 +108,12 @@ void poller_call(void)
 {
 	struct poller_struct *poller, *tmp;
 
-	if (poller_active)
-		return;
+	list_for_each_entry_safe(poller, tmp, &poller_list, list) {
+		if (poller->active)
+			continue;
 
-	poller_active = 1;
-
-	list_for_each_entry_safe(poller, tmp, &poller_list, list)
+		poller->active = true;
 		poller->func(poller);
-
-	poller_active = 0;
+		poller->active = false;
+	}
 }
