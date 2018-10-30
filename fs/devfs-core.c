@@ -158,6 +158,23 @@ int cdev_find_free_index(const char *basename)
 	return -EBUSY;	/* all indexes are used */
 }
 
+char *cdev_find_free_name_or_alias(struct device_node *node,
+				   const char *basename)
+{
+	const char *alias;
+	int ret;
+
+	alias = of_alias_get(node);
+	if (alias)
+		return xstrdup(alias);
+
+	ret = cdev_find_free_index(basename);
+	if (ret < 0)
+		return ERR_PTR(ret);
+
+	return xasprintf("%s%d", basename, ret);
+}
+
 struct cdev *cdev_open(const char *name, unsigned long flags)
 {
 	struct cdev *cdev;
