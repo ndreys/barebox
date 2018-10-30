@@ -14,6 +14,7 @@ struct poller_struct {
 	void (*func)(struct poller_struct *poller);
 	int registered;
 	struct list_head list;
+	bool active;
 };
 
 int poller_register(struct poller_struct *poller);
