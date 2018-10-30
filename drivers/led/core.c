@@ -118,7 +118,6 @@ static int __led_set(struct led *led, unsigned int value)
 int led_set(struct led *led, unsigned int value)
 {
 	led->blink = 0;
-	led->flash = 0;
 	return __led_set(led, value);
 }
 
@@ -128,28 +127,30 @@ static void led_blink_func(struct poller_struct *poller)
 
 	list_for_each_entry(led, &leds, list) {
 		const uint64_t now = get_time_ns();
-		int on;
+		int i;
 
-		if (!led->blink && !led->flash)
+		if (!led->blink)
 			continue;
 
 		if (led->blink_next_event > now) {
 			continue;
 		}
 
-		on = !(led->blink_next_state % 2);
-		if (on)
-			on = led->max_value;
+		if (led->blink > led->blink_nr_states) {
+			switch (led->blink_type) {
+			case LED_BLINK_ONESHOT:
+				led->blink = 0;
+				continue;
+			case LED_BLINK_REPEATING:
+				led->blink = 1;
+				break;
+			}
+		}
 
-		led->blink_next_event = now +
-			(led->blink_states[led->blink_next_state] * MSECOND);
-		led->blink_next_state = (led->blink_next_state + 1) %
-					led->blink_nr_states;
+		i = led->blink++ - 1;
+		led->blink_next_event = now + led->blink_states[i] * MSECOND;
 
-		if (led->flash && !on)
-			led->flash = 0;
-
-		__led_set(led, on);
+		__led_set(led, (i % 2) ? 0 : led->max_value);
 	}
 }
 
@@ -176,10 +177,9 @@ int led_blink_pattern(struct led *led, const unsigned int *pattern,
 	led->blink_states = xmemdup(pattern,
 				    pattern_len * sizeof(*led->blink_states));
 	led->blink_nr_states = pattern_len;
-	led->blink_next_state = 0;
 	led->blink_next_event = 0;
 	led->blink = 1;
-	led->flash = 0;
+	led->blink_type = LED_BLINK_REPEATING;
 
 	return 0;
 }
@@ -194,16 +194,8 @@ int led_blink(struct led *led, unsigned int on_ms, unsigned int off_ms)
 int led_flash(struct led *led, unsigned int duration_ms)
 {
 	unsigned int pattern[] = {duration_ms, 0};
-	int ret;
 
-	ret = led_blink_pattern(led, ARRAY_AND_SIZE(pattern));
-	if (ret)
-		return ret;
-
-	led->flash = 1;
-	led->blink = 0;
-
-	return 0;
+	return led_blink_pattern_once(led, ARRAY_AND_SIZE(pattern));
 }
 
 static struct poller_struct led_poller = {

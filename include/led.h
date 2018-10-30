@@ -6,6 +6,11 @@
 #include <errno.h>
 #include <of.h>
 
+enum led_blink_type {
+	LED_BLINK_REPEATING,
+	LED_BLINK_ONESHOT,
+};
+
 struct led {
 	void (*set)(struct led *, unsigned int value);
 	int max_value;
@@ -14,10 +19,9 @@ struct led {
 	struct list_head list;
 
 	int blink;
-	int flash;
+	enum led_blink_type blink_type;
 	unsigned int *blink_states;
 	int blink_nr_states;
-	int blink_next_state;
 	uint64_t blink_next_event;
 };
 
