@@ -39,6 +39,8 @@ int led_set(struct led *led, unsigned int value);
 int led_blink(struct led *led, unsigned int on_ms, unsigned int off_ms);
 int led_blink_pattern(struct led *led, const unsigned int *pattern,
 		      unsigned int pattern_len);
+int led_blink_pattern_once(struct led *led, const unsigned int *pattern,
+			   unsigned int pattern_len);
 int led_flash(struct led *led, unsigned int duration_ms);
 int led_register(struct led *led);
 void led_unregister(struct led *led);
