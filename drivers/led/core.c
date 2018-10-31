@@ -184,6 +184,15 @@ int led_blink_pattern(struct led *led, const unsigned int *pattern,
 	return 0;
 }
 
+int led_blink_pattern_once(struct led *led, const unsigned int *pattern,
+			   unsigned int pattern_len)
+{
+	led_blink_pattern(led, pattern, pattern_len);
+	led->blink_type = LED_BLINK_ONESHOT;
+
+	return 0;
+}
+
 int led_blink(struct led *led, unsigned int on_ms, unsigned int off_ms)
 {
 	unsigned int pattern[] = {on_ms, off_ms};
