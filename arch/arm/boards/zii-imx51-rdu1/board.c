@@ -18,6 +18,7 @@
 #include <common.h>
 #include <fcntl.h>
 #include <fs.h>
+#include <globalvar.h>
 #include <init.h>
 #include <environment.h>
 #include <libfile.h>
@@ -422,6 +423,31 @@ static int rdu1_fixup_touchscreen(struct device_node *root, void *context)
 	of_device_enable(node);
 	return 0;
 }
+
+static int rdu1_networkconfig(void)
+{
+	static char *rdu_netconfig;
+	struct device_d *sp_dev;
+
+	if (!of_machine_is_compatible("zii,imx51-rdu1"))
+		return 0;
+
+	sp_dev = get_device_by_name("sp");
+	if (!sp_dev) {
+		pr_warn("no sp device found, network config not available!\n");
+		return -ENODEV;
+	}
+
+	rdu_netconfig = basprintf("ip=%s:::%s::eth0:",
+				  dev_get_param(sp_dev, "ipaddr"),
+				  dev_get_param(sp_dev, "netmask"));
+
+	globalvar_add_simple_string("linux.bootargs.rdu_network",
+				    &rdu_netconfig);
+
+	return 0;
+}
+late_initcall(rdu1_networkconfig);
 
 static int rdu1_late_init(void)
 {
