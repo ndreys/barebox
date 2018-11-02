@@ -75,6 +75,13 @@ enum led_brightness {
 int led_set_trigger(enum led_trigger trigger, struct led *led);
 void led_trigger_disable(struct led *led);
 void led_trigger(enum led_trigger trigger, enum trigger_type);
+void led_trigger_pattern(enum led_trigger trigger,
+			 const unsigned int *pattern,
+			 unsigned int pattern_len);
+void led_trigger_pattern_once(enum led_trigger trigger,
+			      const unsigned int *pattern,
+			      unsigned int pattern_len);
+bool led_trigger_patter_is_active(enum led_trigger trigger);
 #else
 static inline int led_set_trigger(enum led_trigger trigger, struct led *led)
 {
@@ -83,6 +90,23 @@ static inline int led_set_trigger(enum led_trigger trigger, struct led *led)
 
 static inline void led_trigger(enum led_trigger trigger, enum trigger_type type)
 {
+}
+
+static inline void led_trigger_pattern(enum led_trigger trigger,
+				       const unsigned int *pattern,
+				       unsigned int pattern_len)
+{
+}
+
+static inline void led_trigger_pattern_once(enum led_trigger trigger,
+					    const unsigned int *pattern,
+					    unsigned int pattern_len)
+{
+}
+
+static inline bool led_trigger_patter_is_active(enum led_trigger trigger)
+{
+	return false;
 }
 #endif
 

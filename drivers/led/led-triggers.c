@@ -86,6 +86,58 @@ void led_trigger(enum led_trigger trigger, enum trigger_type type)
 	}
 }
 
+void led_trigger_pattern(enum led_trigger trigger,
+			 const unsigned int *pattern,
+			 unsigned int pattern_len)
+{
+	struct led_trigger_struct *led_trigger;
+
+	if (trigger >= LED_TRIGGER_MAX)
+		return;
+
+	list_for_each_entry(led_trigger, &led_triggers, list) {
+		if (led_trigger->trigger != trigger)
+			continue;
+
+		led_blink_pattern(led_trigger->led, pattern, pattern_len);
+	}
+}
+
+void led_trigger_pattern_once(enum led_trigger trigger,
+			      const unsigned int *pattern,
+			      unsigned int pattern_len)
+{
+	struct led_trigger_struct *led_trigger;
+
+	if (trigger >= LED_TRIGGER_MAX)
+		return;
+
+	list_for_each_entry(led_trigger, &led_triggers, list) {
+		if (led_trigger->trigger != trigger)
+			continue;
+
+		led_blink_pattern_once(led_trigger->led, pattern, pattern_len);
+	}
+}
+
+bool led_trigger_patter_is_active(enum led_trigger trigger)
+{
+	struct led_trigger_struct *led_trigger;
+
+	if (trigger >= LED_TRIGGER_MAX)
+		return false;
+
+	list_for_each_entry(led_trigger, &led_triggers, list) {
+		if (led_trigger->trigger != trigger)
+			continue;
+
+		if (led_trigger->led->blink)
+			return true;
+	}
+
+	return false;
+}
+
 static struct led_trigger_struct *led_find_trigger(struct led *led)
 {
 	struct led_trigger_struct *led_trigger;
