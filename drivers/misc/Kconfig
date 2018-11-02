@@ -42,4 +42,9 @@ config ACPI_TEST
 	help
 	  This is a simple Test driver to test the ACPI bus.
 
+config BLINK_ENCODER
+        tristate "Blinking LED encoder"
+	depends on LED && LED_TRIGGERS
+
+
 endmenu
