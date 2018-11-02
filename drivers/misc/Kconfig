@@ -20,4 +20,8 @@ config STATE_DRV
 	depends on OFDEVICE
 	depends on STATE
 
+config BLINK_ENCODER
+        tristate "Blinking LED encoder"
+	depends on LED && LED_TRIGGERS
+
 endmenu
