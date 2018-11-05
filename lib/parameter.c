@@ -346,20 +346,23 @@ static int param_int_set(struct device_d *dev, struct param_d *p, const char *va
 		ret = strtobool(val, pi->value);
 		break;
 	case PARAM_TYPE_INT32:
-		*(int32_t *)pi->value = simple_strtol(val, NULL, 0);
+		ret = kstrtos32(val, 0, pi->value);
 		break;
 	case PARAM_TYPE_UINT32:
-		*(uint32_t *)pi->value = simple_strtoul(val, NULL, 0);
+		ret = kstrtou32(val, 0, pi->value);
 		break;
 	case PARAM_TYPE_INT64:
-		*(int64_t *)pi->value = simple_strtoll(val, NULL, 0);
+		ret = kstrtos64(val, 0, pi->value);
 		break;
 	case PARAM_TYPE_UINT64:
-		*(uint64_t *)pi->value = simple_strtoull(val, NULL, 0);
+		ret = kstrtou64(val, 0, pi->value);
 		break;
 	default:
 		return -EINVAL;
 	}
+
+	if (ret < 0)
+		return ret;
 
 	if (!pi->set)
 		return 0;
