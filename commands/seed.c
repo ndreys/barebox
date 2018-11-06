@@ -19,16 +19,20 @@
 
 static int do_seed(int argc, char *argv[])
 {
+	unsigned int seed;
+	int ret;
+
 	if (argc < 2)
 		return COMMAND_ERROR_USAGE;
 
-	if (isdigit(*argv[1])) {
-		srand(simple_strtoul(argv[1], NULL, 0));
-		return 0;
+	ret = kstrtouint(argv[1], 0, &seed);
+	if (ret < 0) {
+		printf("numerical parameter expected\n");
+		return 1;
 	}
 
-	printf("numerical parameter expected\n");
-	return 1;
+	srand(seed);
+	return 0;
 }
 
 BAREBOX_CMD_HELP_START(seed)
