@@ -77,11 +77,15 @@
 		};
 
 		eeprom@a4 {
-			nvmem-cells = <&shadow_config>;
-			nvmem-cell-names = "shadow-config";
+			nvmem-cells = <&shadow_config>, <&disable_pic>;
+			nvmem-cell-names = "shadow-config", "disable-pic";
 
 			boot_source: boot-source@83 {
 				reg = <0x83 1>;
+			};
+
+			disable_pic: disable-pic@a2 {
+				reg = <0xa2 0x1>;
 			};
 
 			shadow_config: shadow-config@1000 {
