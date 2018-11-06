@@ -1,84 +1,60 @@
 #include <common.h>
 #include <linux/ctype.h>
 
-unsigned long simple_strtoul(const char *cp, char **endp, unsigned int base)
+#include "kstrtox.h"
+
+unsigned long long simple_strtoull(const char *cp, char **endp,
+				   unsigned int base)
 {
-	unsigned long result = 0, value;
+	unsigned long long result;
+	unsigned int r;
+	const char *s;
 
-	if (*cp == '0') {
-		cp++;
-
-		if ((*cp == 'x') && isxdigit(cp[1])) {
-			base = 16;
-			cp++;
-		}
-
-		if (!base)
-			base = 8;
-	}
-
-	if (!base)
-		base = 10;
-
-	while (isxdigit(*cp) && (value = isdigit(*cp) ?
-	       *cp - '0' : toupper(*cp) - 'A' + 10) < base) {
-		result = result * base + value;
-		cp++;
-	}
+	s = _parse_integer_fixup_radix(cp, &base);
+	r = _parse_integer(s, base, &result);
+	if (r & KSTRTOX_OVERFLOW)
+		return ULLONG_MAX;
 
 	if (endp)
-		*endp = (char *)cp;
-
-	return result;
-}
-EXPORT_SYMBOL(simple_strtoul);
-
-long simple_strtol(const char *cp, char **endp, unsigned int base)
-{
-	if (*cp == '-')
-		return -simple_strtoul(cp + 1, endp, base);
-
-	return simple_strtoul(cp, endp, base);
-}
-EXPORT_SYMBOL(simple_strtol);
-
-unsigned long long simple_strtoull(const char *cp, char **endp, unsigned int base)
-{
-	unsigned long long result = 0, value;
-
-	if (*cp == '0') {
-		cp++;
-
-		if ((*cp == 'x') && isxdigit(cp[1])) {
-			base = 16;
-			cp++;
-		}
-
-		if (!base)
-			base = 8;
-	}
-
-	if (!base)
-		base = 10;
-
-	while (isxdigit(*cp) && (value = isdigit(*cp) ?
-	       *cp - '0' : toupper(*cp) - 'A' + 10) < base) {
-		result = result * base + value;
-		cp++;
-	}
-
-	if (endp)
-		*endp = (char *)cp;
+		*endp = (char *)s + r;
 
 	return result;
 }
 EXPORT_SYMBOL(simple_strtoull);
 
+unsigned long simple_strtoul(const char *cp, char **endp, unsigned int base)
+{
+	const unsigned long long result = simple_strtoull(cp, endp, base);
+
+	return clamp_t(unsigned long long, result, 0, ULONG_MAX);
+}
+EXPORT_SYMBOL(simple_strtoul);
+
 long long simple_strtoll(const char *cp, char **endp, unsigned int base)
 {
-	if (*cp == '-')
-		return -simple_strtoull(cp + 1, endp, base);
+	unsigned long long upper_boundary = LONG_MAX;
+	unsigned long long result;
+	bool negative = *cp == '-';
 
-	return simple_strtoull(cp, endp, base);
+	if (negative) {
+		upper_boundary++;
+		cp++;
+	}
+
+	result = clamp_t(unsigned long long,
+			 simple_strtoull(cp, endp, base),
+			 0, upper_boundary);
+	if (negative)
+		return -result;
+
+	return result;
 }
 EXPORT_SYMBOL(simple_strtoll);
+
+long simple_strtol(const char *cp, char **endp, unsigned int base)
+{
+	long long result = simple_strtoll(cp, endp, base);
+
+	return clamp_t(long long, result, LONG_MIN, LONG_MAX);
+}
+EXPORT_SYMBOL(simple_strtol);
