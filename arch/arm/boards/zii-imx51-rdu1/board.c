@@ -462,3 +462,49 @@ static int rdu1_late_init(void)
 	return 0;
 }
 late_initcall(rdu1_late_init);
+
+static int zii_rdu1_fixup_disable_pic(struct device_node *root, void *context)
+{
+	struct device_node *rave_sp;
+
+	rave_sp = of_find_node_by_name(root, "rave-sp");
+	if (WARN_ON(!rave_sp))
+		return -ENOENT;
+
+	of_delete_node(rave_sp);
+
+	return 0;
+}
+
+static int zii_rdu1_disable_sp_node(void)
+{
+	struct device_node *np;
+	u8 *disable_pic;
+
+	if (!of_machine_is_compatible("zii,imx51-rdu1"))
+		return 0;
+
+	np = of_find_node_by_name(NULL, "eeprom@a4");
+	if (WARN_ON(!np))
+		return -ENOENT;
+
+	disable_pic = nvmem_cell_get_and_read(np, "disable-pic-driver", 1);
+	if (IS_ERR(disable_pic))
+		return PTR_ERR(disable_pic);
+
+	if (*disable_pic) {
+		pr_info("PIC driver is disabled, run "
+			"\"memset -b -d /dev/main-eeprom 0xa2 0 1\""
+			" to enable\n");
+		of_register_fixup(zii_rdu1_fixup_disable_pic, NULL);
+	} else {
+		pr_info("PIC driver is enabled, run "
+			"\"memset -b -d /dev/main-eeprom 0xa2 1 1\""
+			" to disable\n");
+	}
+
+	free(disable_pic);
+
+	return 0;
+}
+late_initcall(zii_rdu1_disable_sp_node);
