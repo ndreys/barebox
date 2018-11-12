@@ -189,6 +189,9 @@
 		};
 
 		eeprom@a4 {
+			nvmem-cells = <&disable_pic_driver>;
+			nvmem-cell-names = "disable-pic-driver";
+
 			lru_part_number: lru-part-number@21 {
 				reg = <0x21 15>;
 				read-only;
@@ -196,6 +199,10 @@
 
 			boot_source: boot-source@83 {
 				reg = <0x83 1>;
+			};
+
+			disable_pic_driver: disable-pic-driver@a2 {
+				reg = <0xa2 0x1>;
 			};
 
 			mac_address_0: mac-address@180 {
