@@ -116,6 +116,10 @@
 	};
 };
 
+&i2c2 {
+	/delete-node/ eeprom@50;
+};
+
 &ecspi1 {
 	spinor: flash@1 {
 		partition@0 {
