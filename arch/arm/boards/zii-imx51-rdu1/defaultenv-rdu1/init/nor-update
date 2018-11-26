@@ -1,0 +1,19 @@
+#!/bin/bash
+
+detect mmc0
+if [ "$bootsource" = "spi" ] && [ "$mmc0.boot" = "disabled" ]; then
+	bank=
+	[ -f /mnt/mmc0.0/boot/barebox-zii-imx51-rdu1.img ] && bank=0
+	[ -f /mnt/mmc0.1/boot/barebox-zii-imx51-rdu1.img ] && bank=1
+
+	if [ -n "$bank" ]; then
+		echo The bootloader will be updated from from Bank$bank
+		cp -v /mnt/mmc0.$bank/boot/barebox-zii-imx51-rdu1.img /dev/mmc0.boot$bank
+		mmc0.boot=boot$bank
+		wdog0.boot_source=1
+		echo Updating complete
+		reset
+	fi
+
+fi
+
