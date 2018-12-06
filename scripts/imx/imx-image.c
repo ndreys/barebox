@@ -324,7 +324,10 @@ static size_t add_header_v2(const struct config_data *data, void *buf)
 	hdr->self		= loadaddr + offset;
 
 	hdr->boot_data.start	= loadaddr;
-	hdr->boot_data.size	= imagesize;
+	if (data->max_load_size && imagesize > data->max_load_size)
+		hdr->boot_data.size	= data->max_load_size;
+	else
+		hdr->boot_data.size	= imagesize;
 
 	if (data->csf) {
 		hdr->csf = loadaddr + imagesize;
@@ -797,18 +800,23 @@ int main(int argc, char *argv[])
 	}
 
 	/*
-	 * Add HEADER_LEN to the image size for the blank aera + IVT + DCD.
+	 * Add HEADER_LEN to the image size for the blank area + IVT + DCD.
 	 * Align up to a 4k boundary, because:
 	 * - at least i.MX5 NAND boot only reads full NAND pages and misses the
 	 *   last partial NAND page.
 	 * - i.MX6 SPI NOR boot corrupts the last few bytes of an image loaded
-	 *   in ver funy ways when the image size is not 4 byte aligned
+	 *   in very funny ways when the image size is not 4 byte aligned
 	 */
 	data.load_size = roundup(data.image_size + header_len, 0x1000);
 
 	ret = parse_config(&data, configfile);
 	if (ret)
 		exit(1);
+
+	if (data.max_load_size && (sign_image || data.encrypt_image)) {
+		fprintf(stderr, "Specifying max_load_size is incompatible with HAB signing/encrypting\n");
+		exit(1);
+	}
 
 	if (!sign_image)
 		data.csf = NULL;
