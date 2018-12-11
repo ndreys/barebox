@@ -121,7 +121,6 @@ struct dw_pcie_ops {
 struct dw_pcie {
 	struct device_d         *dev;
 	void __iomem            *dbi_base;
-	u32                     lanes;
 	u32                     num_viewport;
 	struct pcie_port        pp;
 	const struct dw_pcie_ops *ops;
