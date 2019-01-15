@@ -15,6 +15,7 @@
 
 #include <common.h>
 #include <envfs.h>
+#include <environment.h>
 #include <fs.h>
 #include <gpio.h>
 #include <i2c/i2c.h>
@@ -457,3 +458,35 @@ static int rdu2_disable_sp_node(void)
 	return 0;
 }
 late_initcall(rdu2_disable_sp_node);
+
+static int rdu2_enable_developer_mode(void)
+{
+	struct device_node *np;
+	u8 *enable_developer_mode;
+
+	if (!of_machine_is_compatible("zii,imx6q-zii-rdu2") &&
+	    !of_machine_is_compatible("zii,imx6qp-zii-rdu2"))
+		return 0;
+
+	np = of_find_node_by_name(NULL, "eeprom@a4");
+	if (WARN_ON(!np))
+		return -ENOENT;
+
+	enable_developer_mode =
+		nvmem_cell_get_and_read(np, "enable-developer-mode", 1);
+	if (IS_ERR(enable_developer_mode))
+		return PTR_ERR(enable_developer_mode);
+
+	if (*enable_developer_mode) {
+		pr_info("Developer Mode is enable, run "
+			"\"memset -b -d /dev/main-eeprom 0xa3 0 1\""
+			" to disable\n");
+		setenv("enable_developer_mode", "yes");
+		export("enable_developer_mode");
+	}
+
+	free(enable_developer_mode);
+
+	return 0;
+}
+late_initcall(rdu2_enable_developer_mode);

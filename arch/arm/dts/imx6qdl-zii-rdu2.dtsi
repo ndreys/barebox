@@ -189,8 +189,8 @@
 		};
 
 		eeprom@a4 {
-			nvmem-cells = <&disable_pic_driver>;
-			nvmem-cell-names = "disable-pic-driver";
+			nvmem-cells = <&disable_pic_driver>, <&enable_developer_mode>;
+			nvmem-cell-names = "disable-pic-driver", "enable-developer-mode";
 
 			lru_part_number: lru-part-number@21 {
 				reg = <0x21 15>;
@@ -203,6 +203,10 @@
 
 			disable_pic_driver: disable-pic-driver@a2 {
 				reg = <0xa2 0x1>;
+			};
+
+			enable_developer_mode: enable-developer-mode@a3 {
+				reg = <0xa3 0x1>;
 			};
 
 			mac_address_0: mac-address@180 {

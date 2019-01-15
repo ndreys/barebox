@@ -1,5 +1,16 @@
 #!/bin/sh
 
-splash /env/logo/rave.png
-version -d /dev/fb0 -p lower-left
-fb0.enable=1
+if [ "${enable_developer_mode}" = "yes" ]; then
+    # If Developer Mode is enabled, instead of displaying a splash
+    # screen, enable FB console and display boot log we've missed so
+    # far
+    fb0.enable=1
+    fbconsole0.active=oe
+    # Temporary disable serial console to avoid seeing boot log twice
+    serial0.active=i
+    dmesg
+    serial0.active=ioe
+else
+    splash /env/logo/rave.png
+    fb0.enable=1
+fi
