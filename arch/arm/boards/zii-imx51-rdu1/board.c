@@ -57,6 +57,37 @@ static int zii_rdu1_init(void)
 }
 coredevice_initcall(zii_rdu1_init);
 
+static int zii_rdu1_enable_developer_mode(void)
+{
+	struct device_node *np;
+	u8 *enable_developer_mode;
+
+	if (!of_machine_is_compatible("zii,imx51-rdu1"))
+		return 0;
+
+	np = of_find_node_by_name(NULL, "eeprom@a4");
+	if (WARN_ON(!np))
+		return -ENOENT;
+
+	enable_developer_mode =
+		nvmem_cell_get_and_read(np, "enable-developer-mode", 1);
+	if (IS_ERR(enable_developer_mode))
+		return PTR_ERR(enable_developer_mode);
+
+	if (*enable_developer_mode) {
+		pr_info("Developer Mode is enable, run "
+			"\"memset -b -d /dev/main-eeprom 0xa3 0 1\""
+			" to disable\n");
+		setenv("enable_developer_mode", "yes");
+		export("enable_developer_mode");
+	}
+
+	free(enable_developer_mode);
+
+	return 0;
+}
+late_initcall(zii_rdu1_enable_developer_mode);
+
 #define KEY		0
 #define VALUE		1
 #define STRINGS_NUM	2
