@@ -105,7 +105,7 @@ static int devfs_memmap(struct device_d *_dev, FILE *f, void **map, int flags)
 	ret = cdev->ops->memmap(cdev, map, flags);
 
 	if (!ret)
-		*map = (void *)((unsigned long)*map + (unsigned long)cdev->offset);
+		*map += cdev->offset;
 
 	return ret;
 }
