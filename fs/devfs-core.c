@@ -569,7 +569,7 @@ static ssize_t mem_copy(struct device_d *dev, void *dst, const void *src,
 
 	rwsize = rwsize >> O_RWSIZE_SHIFT;
 
-	count = ALIGN_DOWN(count, rwsize);
+	count = size = ALIGN_DOWN(count, rwsize);
 
 	while (count) {
 		switch (rwsize) {
