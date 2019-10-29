@@ -449,6 +449,10 @@ static int imx_gpcv2_probe(struct device_d *dev)
 		struct device_d *pd_dev;
 		struct imx_pgc_domain *domain;
 		u32 domain_index;
+
+		if (!of_device_is_available(np))
+			continue;
+
 		ret = of_property_read_u32(np, "reg", &domain_index);
 		if (ret) {
 			dev_err(dev, "Failed to read 'reg' property\n");
