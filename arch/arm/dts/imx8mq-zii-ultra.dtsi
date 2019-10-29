@@ -66,6 +66,14 @@
 	nvmem-cell-names = "mac-address";
 };
 
+&pgc_gpu {
+	status = "disabled";
+};
+
+&pgc_vpu {
+	status = "disabled";
+};
+
 &uart2 {
 	rave-sp {
 		eeprom@a4 {
