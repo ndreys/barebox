@@ -15,6 +15,7 @@
 
 #define LRU_FLAG_EGALAX		BIT(0)
 #define LRU_FLAG_NO_DEB		BIT(1)
+#define LRU_FLAG_ROTATED_PANEL	BIT(2)
 
 struct zii_imx8mq_dev_lru_fixup {
 	struct zii_pn_fixup fixup;
@@ -130,6 +131,20 @@ static int zii_imx8mq_dev_fixup_deb(struct device_node *root, void *ctx)
 	return 0;
 }
 
+static int zii_imx8mq_dev_fixup_panel_rotation(struct device_node *root,
+					       void *ctx)
+{
+	struct device_node *np;
+
+	np = of_find_compatible_node(root, NULL, "fsl,imx8mq-dp");
+	if (!np)
+		return -ENODEV;
+
+	of_property_write_u32(np, "rotation", 90);
+
+	return 0;
+}
+
 static void zii_imx8mq_dev_lru_fixup(const struct zii_pn_fixup *context)
 {
 	const struct zii_imx8mq_dev_lru_fixup *fixup =
@@ -142,6 +157,9 @@ static void zii_imx8mq_dev_lru_fixup(const struct zii_pn_fixup *context)
 		zii_imx8mq_dev_fixup_deb_internal();
 		of_register_fixup(zii_imx8mq_dev_fixup_deb, NULL);
 	}
+
+	if (fixup->flags & LRU_FLAG_ROTATED_PANEL)
+		of_register_fixup(zii_imx8mq_dev_fixup_panel_rotation, NULL);
 }
 
 #define ZII_IMX8MQ_DEV_LRU_FIXUP(__pn, __flags)		\
@@ -153,7 +171,7 @@ static void zii_imx8mq_dev_lru_fixup(const struct zii_pn_fixup *context)
 static const struct zii_imx8mq_dev_lru_fixup zii_imx8mq_dev_lru_fixups[] = {
 	ZII_IMX8MQ_DEV_LRU_FIXUP("00-5131-02", LRU_FLAG_EGALAX),
 	ZII_IMX8MQ_DEV_LRU_FIXUP("00-5131-03", LRU_FLAG_EGALAX),
-	ZII_IMX8MQ_DEV_LRU_FIXUP("00-5170-01", LRU_FLAG_NO_DEB),
+	ZII_IMX8MQ_DEV_LRU_FIXUP("00-5170-01", LRU_FLAG_NO_DEB | LRU_FLAG_ROTATED_PANEL),
 };
 
 /*
