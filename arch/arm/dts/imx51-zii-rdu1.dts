@@ -56,6 +56,12 @@
 		switch-eeprom = &switch;
 		microwire-eeprom = &microwire_eeprom;
 	};
+
+	device-info {
+		nvmem-cells = <&dds_part_number>;
+		nvmem-cell-names = "dds-part-number";
+	};
+
 };
 
 &ecspi1 {
@@ -112,6 +118,13 @@
 		watchdog {
 			nvmem-cells = <&boot_source>;
 			nvmem-cell-names = "boot-source";
+		};
+
+		eeprom@a3 {
+			dds_part_number: dds-part-number@21 {
+				reg = <0x21 15>;
+				read-only;
+			};
 		};
 
 		eeprom@a4 {

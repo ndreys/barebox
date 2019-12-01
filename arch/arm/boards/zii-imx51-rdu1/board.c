@@ -25,6 +25,7 @@
 #include <linux/crc8.h>
 #include <linux/sizes.h>
 #include <linux/nvmem-consumer.h>
+#include "../zii-common/pn-fixup.h"
 
 #include <envfs.h>
 
@@ -224,3 +225,42 @@ static int zii_rdu1_ethernet_init(void)
 /* This needs to happen only after zii_rdu1_load_config was
  * executed */
 environment_initcall(zii_rdu1_ethernet_init);
+
+static void zii_rdu1_sp_switch_eeprom(const struct zii_pn_fixup *fixup)
+{
+	struct device_node *np, *root, *sp_node;
+	struct device_d *sp_dev;
+
+	root = of_get_root_node();
+	np   = of_find_node_by_name(root, "eeprom@ae");
+	if (WARN_ON(!np))
+		return;
+
+	sp_node = of_find_node_by_name(root, "rave-sp");
+	if (WARN_ON(!sp_node))
+		return;
+
+	sp_dev = of_find_device_by_node(sp_node);
+	if (WARN_ON(!sp_dev))
+		return;
+
+	of_device_enable(np);
+
+	WARN_ON(!of_platform_device_create(np, sp_dev));
+}
+
+static const struct zii_pn_fixup zii_rdu1_dds_fixups[] = {
+	{ "05-0004-02-E3", zii_rdu1_sp_switch_eeprom }
+};
+
+static int zii_rdu1_process_fixups(void)
+{
+	if (!of_machine_is_compatible("zii,imx51-rdu1"))
+		return 0;
+
+	zii_process_dds_fixups(zii_rdu1_dds_fixups);
+
+	return 0;
+}
+postmmu_initcall(zii_rdu1_process_fixups);
+
