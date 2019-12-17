@@ -66,6 +66,13 @@
 	nvmem-cell-names = "mac-address";
 };
 
+&i2c3 {
+	watchdog@38 {
+		compatible = "zii,rave-wdt";
+		reg = <0x38>;
+	};
+};
+
 &pgc_gpu {
 	status = "disabled";
 };
