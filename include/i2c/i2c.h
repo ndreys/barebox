@@ -281,6 +281,14 @@ static inline int i2c_register_board_info(int busnum,
 extern int i2c_add_numbered_adapter(struct i2c_adapter *adapter);
 struct i2c_adapter *i2c_get_adapter(int busnum);
 struct i2c_adapter *of_find_i2c_adapter_by_node(struct device_node *node);
+static inline struct i2c_client *
+of_find_i2c_device_by_node(struct device_node *node)
+{
+	struct device_d *dev = of_find_device_by_node(node);
+
+	return dev ? to_i2c_client(dev) : NULL;
+}
+
 
 void i2c_parse_fw_timings(struct device_d *dev, struct i2c_timings *t, bool use_defaults);
 
